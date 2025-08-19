@@ -19,3 +19,8 @@ export const logout = params => {
 export const getUserInfo = () => {
   return http.get('/getUserInfo');
 }
+
+// 更新用户邮箱信息
+export const updateUserEmail = params => {
+  return http.post('/updateEmail', params);
+}

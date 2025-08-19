@@ -19,6 +19,9 @@ router.get('/getUserInfo', userController.getCurrentUser);
 // 用户登出
 router.post('/logout', userController.userLogout);
 
+// 更新用户邮箱信息
+router.post('/updateEmail', userController.updateEmail);
+
 // router.get('/', function (ctx, next) {
 //   ctx.body = 'this is a users response!'
 // })

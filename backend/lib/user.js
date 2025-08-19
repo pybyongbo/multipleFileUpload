@@ -39,3 +39,9 @@ exports.updateUserLastLogin = (id, lastLoginTime) => {
   let _sql = `UPDATE users SET last_login = ? WHERE id = ?`;
   return query(_sql, [lastLoginTime, id]);
 };
+
+// 更新用户邮箱信息
+exports.updateUserEmail = (id, email) => {
+  let _sql = `UPDATE users SET email = ? WHERE id = ?`;
+  return query(_sql, [email, id]);
+}

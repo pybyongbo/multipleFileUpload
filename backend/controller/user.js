@@ -197,3 +197,24 @@ exports.userLogout = async ctx => {
     };
   }
 };
+
+// 更新用户邮箱信息
+exports.updateEmail = async ctx => {
+  try {
+    const userId = ctx.state.user.id;
+    const { email } = ctx.request.body;
+
+    await userModel.updateUserEmail(userId, email.trim());
+      ctx.body = {
+        code: 200,
+        message: '更新邮箱成功',
+      };
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = {
+      code: 500,
+      message: '服务器内部错误'
+    };
+  }
+}

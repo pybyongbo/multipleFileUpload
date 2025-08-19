@@ -1,11 +1,5 @@
 <template>
    <!-- color="#dedede" -->
-  <!-- <Watermark 
-    :text="`当前用户:${userStore.name}`" 
-    :opacity="0.3"
-    :font-size="30"
-    color="#dedede" 
-    :gap="30"> -->
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :span="6" :xs="24">
@@ -25,7 +19,7 @@
                 <svg-icon icon-class="email" />用户邮箱
                 <div class="pull-right" v-if="userStore.email">{{ userStore.email }}</div>
                 <div class="pull-right no-email" v-else><span style="vertical-align: -1px;">未填写</span> <el-button link
-                    type="primary" size="small">更新</el-button></div>
+                    type="primary" size="small" @click="upDateEmailInfo">更新</el-button></div>
               </li>
               <li class="list-group-item">
                 <svg-icon icon-class="date" />用户注册时间
@@ -45,7 +39,7 @@
               <span>最新上传图片文件Top5</span>
             </div>
           </template>
-          <div>
+          <div v-if="carouselData.length>0">
             <Carousel ref="carouselRef" @change="handleChange" :imgs="carouselData" :autoPlay="true"></Carousel>
             <div class="current">
               <el-button type="primary"  @click="$event=>change(currentIndex-1)" :disabled="currentIndex===0">
@@ -56,8 +50,12 @@
                 &gt;
               </el-button>
             </div>
-             
           </div>
+          <div class="no-data-other-file" v-else>
+              <span>暂未上传图片类型文件</span>
+              <br>  
+              <el-button type="primary" link @click="goToUploadPage">去上传</el-button>
+            </div>
         </el-card>
 
         <el-card class="box-card other-card">
@@ -249,12 +247,35 @@
     <Teleport to="body">
         <el-image-viewer v-if="showPreview" :url-list="curUrlList" show-progress @close="showPreview = false" />
     </Teleport>
+
+    <!-- 更新邮箱信息弹框 -->
+     <el-dialog 
+        v-model="dialogFormVisible" 
+        title="更新邮箱信息" 
+        width="500" 
+        align-center 
+        :close-on-click-modal="false"
+        >
+        <el-form :model="user" :rules="rules" ref="emailFormRef" @submit.native.prevent="submitEmailForm">
+          <el-form-item label="邮箱地址" label-width="80" prop="email">
+            <el-input v-model="user.email" placeholder="请输入邮箱地址" autocomplete="off" />
+          </el-form-item>
+          
+        </el-form>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitEmailForm">
+              确定
+            </el-button>
+          </div>
+        </template>
+  </el-dialog>
   </div>
-  <!-- </Watermark> -->
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref,reactive, watch, toRefs,onMounted } from 'vue';
 import useUserStore from '@/store/modules/user'
 import { dayjs,ElMessage, ElMessageBox } from 'element-plus';
 import { useRoute, useRouter } from 'vue-router';
@@ -267,6 +288,7 @@ import Watermark from '@/components/WaterMark/index.vue';
 import { isImage,bytesToKB } from '@/utils/tools';
 import { scrollTo } from '@/utils/scroll-to.js';
 import { 
+
   getFileListByUserId, 
   getFileListDeletedByUserId,
   getCarouselData,
@@ -276,6 +298,10 @@ import {
   restoreFileById,
   getOtherFileListTop5
 } from "@/api/uploadfile";
+
+import {  updateUserEmail, getUserInfo } from "@/api/user";
+
+
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -305,7 +331,79 @@ const currentIndex = ref(0);
 // 其他文件
 const otherFileListData = ref([]);
 
+const dialogFormVisible = ref(false);
+
 const selectable = (row) => isImage(row.file_name);
+
+// 邮箱格式验证函数
+const validateEmail = (rule, value, callback) => {
+  // 如果邮箱为空，直接通过验证
+  if (!value) {
+    callback(new Error("邮箱地址不能为空"));
+  }
+  
+  // 邮箱格式正则表达式
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  
+  if (!emailRegex.test(value)) {
+    callback(new Error("请输入正确的邮箱格式"));
+  } else {
+    callback();
+  }
+};
+
+// 添加表单引用
+const emailFormRef = ref(null)
+const formData = reactive({
+ user: {
+    email: '', // 邮箱
+  },
+  rules: {
+    email: [
+      { required: true, validator: validateEmail, trigger: "blur" },
+    ],
+  },
+});
+
+const { user, rules } = toRefs(formData);
+
+const upDateEmailInfo = () => {
+  dialogFormVisible.value = true;
+}
+
+const submitEmailForm = () => {
+  emailFormRef.value.validate((valid) => {
+    if (valid) {
+      // 校验通过，执行更新邮箱逻辑
+      // console.log('邮箱校验通过:', user.value.email);
+      updateUserEmail({ email: user.value.email }).then(res => {
+        if(res.code === 200) {
+          ElMessage({
+            message: '更新邮箱成功！',
+            type: 'success',
+          });
+          userStore.getInfo().then(res => {
+            console.log('6655', res);
+
+          }).catch(() => {
+          })
+        } else {
+          ElMessage({
+            message: '更新邮箱失败！',
+            type: 'error',
+          });
+        }
+
+         dialogFormVisible.value = false
+      })
+
+     
+    } else {
+      console.log('邮箱校验失败')
+      return false
+    }
+  })
+}
 const handleSelectionChange = (val) => {
   const fileListInfo = val.map(item => {
     return {
@@ -572,6 +670,7 @@ const getOtherFileList = async () => {
 
 
 .other-card{
+  margin-top:18px;
   :deep(.el-card__body) {
     height:260px;
   }
@@ -774,5 +873,16 @@ const getOtherFileList = async () => {
     margin:0 10px;
     font-size:12px;
   }
+}
+
+// 移除 el-button 聚焦时的边框
+:deep(.el-button:focus) {
+  outline: none;
+  border-color: transparent;
+}
+
+:deep(.el-button:focus-visible) {
+  outline: none;
+  border-color: transparent;
 }
 </style>
