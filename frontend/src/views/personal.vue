@@ -537,6 +537,7 @@ const deleteSingleFile =async (item,index) =>{
     if (res.success) {
           ElMessage.success('删除成功');
           getFileList(pageActive.value);
+          getCarouselTop5();
         } else {
           throw new Error(res.message)
         }
@@ -873,16 +874,5 @@ const getOtherFileList = async () => {
     margin:0 10px;
     font-size:12px;
   }
-}
-
-// 移除 el-button 聚焦时的边框
-:deep(.el-button:focus) {
-  outline: none;
-  border-color: transparent;
-}
-
-:deep(.el-button:focus-visible) {
-  outline: none;
-  border-color: transparent;
 }
 </style>

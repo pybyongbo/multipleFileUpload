@@ -97,3 +97,7 @@ a,a:focus,a:hover {
 div:focus {
     outline: none
 }
+
+button:focus, button:focus-visible{
+    outline: none!important;
+}
