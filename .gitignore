@@ -9,9 +9,13 @@ lerna-debug.log*
 
 # Uploads folder - ignore all uploads directories
 **/uploads/
+uploads/
 
-# Node modules
+# Node modules - ignore all node_modules directories
 **/node_modules/
+node_modules/
+*/node_modules/
+multipleFileUpload/*/node_modules/
 
 # Dist folders
 dist/
@@ -35,3 +39,8 @@ multipleFileUpload/frontend/dist/
 .env
 .env.local
 .env.*.local
+
+# System files
+Thumbs.db
+ehthumbs.db
+Icon?
