@@ -42,6 +42,6 @@ CREATE TABLE `files` (
   KEY `idx_upload_time` (`upload_time`),
   KEY `idx_mime_type` (`mime_type`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=232 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件上传表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件上传表';
 
 SET FOREIGN_KEY_CHECKS = 1;
