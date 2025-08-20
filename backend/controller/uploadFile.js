@@ -824,3 +824,28 @@ exports.uploadFileBinary = async (ctx) => {
     };
   }
 }
+
+// 彻底删除文件 
+exports.completeDeleteFile = async (ctx) => { 
+
+   const { filename } = ctx.request.body;
+  const userId = ctx.state.user.id; // 获取当前用户ID
+  if (!filename) {
+    ctx.body = { success: false, msg: '文件ID不能为空' };
+    return;
+  }
+  
+  try {
+      const filePath = path.join(__dirname, `../public/${filename}`);
+      await fileModel.completeDeleteFile(userId,filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);  // 删除文件
+      }
+    ctx.body = { success: true };
+  } catch (err) {
+    console.log('error', err);
+    ctx.body = { success: false, msg: '删除失败' };
+  } 
+
+
+}

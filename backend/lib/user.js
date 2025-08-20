@@ -40,6 +40,12 @@ exports.updateUserLastLogin = (id, lastLoginTime) => {
   return query(_sql, [lastLoginTime, id]);
 };
 
+// 更新最新登录IP
+exports.updateUserLastLoginIp = (id, lastIp) => {
+  let _sql = `UPDATE users SET login_ip = ? WHERE id = ?`;
+  return query(_sql, [lastIp, id]);
+}
+
 // 更新用户邮箱信息
 exports.updateUserEmail = (id, email) => {
   let _sql = `UPDATE users SET email = ? WHERE id = ?`;

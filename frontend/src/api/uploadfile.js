@@ -89,3 +89,10 @@ export const uploadFileBase64 = params => {
 export const uploadFileBinary = (params,headers) => {
   return http.post('/uploadFileBinary', params, {...headers});
 }
+
+
+// 彻底删除文件
+
+export const completeDeleteFile = (params) => {
+  return http.post("/completedelete", params);
+}

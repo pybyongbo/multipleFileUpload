@@ -4,9 +4,7 @@ import { userLogin,
   logout, 
   getUserInfo 
 } from '@/api/user'
-// import { userLogin } from "@/api/user"
 import { getToken, setToken, removeToken } from '@/utils/auth'
-// import { isHttp, isEmpty } from "@/utils/validate"
 
 const useUserStore = defineStore(
   'user',
@@ -18,6 +16,7 @@ const useUserStore = defineStore(
       email: '',
       created_at: '',
       last_login: '',
+      login_ip: '',
     }),
     actions: {
       // 登录
@@ -29,7 +28,6 @@ const useUserStore = defineStore(
         return new Promise((resolve, reject) => {
           userLogin({username, password}).then(res => {
             const {code, data={},message} = res;
-            console.log('res222',res);
             if (code !== 200) {
               ElMessage({
                 message: message || '登录失败',
@@ -50,12 +48,14 @@ const useUserStore = defineStore(
       getInfo() {
         return new Promise((resolve, reject) => {
           getUserInfo().then(res => {
+            console.log('res666',res);
             const user = res.data
             this.id = user.id
             this.name = user.username
             this.email = user.email
             this.created_at = user.created_at
             this.last_login = user.last_login
+            this.login_ip = user.login_ip
           
             resolve(res.data)
           }).catch(error => {

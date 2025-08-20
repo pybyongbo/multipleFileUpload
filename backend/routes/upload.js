@@ -63,4 +63,8 @@ router.post('/uploadFileBase64', upload.array('files', 5), fileController.upload
 router.post('/uploadFileBinary', upload.array('files', 5), fileController.uploadFileBinary);
 
 
+// 彻底删除文件操作
+router.post('/completedelete', fileController.completeDeleteFile);
+
+
 module.exports = router;

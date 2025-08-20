@@ -36,3 +36,9 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+// 添加字段
+
+ALTER TABLE users
+ADD COLUMN `login_ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户IP地址' AFTER email

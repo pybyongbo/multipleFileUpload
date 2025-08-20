@@ -1,89 +1,97 @@
 <template>
    <!-- color="#dedede" -->
   <div class="app-container">
-    <el-row :gutter="20">
-      <el-col :span="6" :xs="24">
-        <el-card class="box-card">
-          <template v-slot:header>
-            <div class="clearfix">
-              <span>个人信息</span>
-            </div>
-          </template>
-          <div>
-            <ul class="list-group list-group-striped">
-              <li class="list-group-item">
-                <svg-icon icon-class="user" />用户名称
-                <div class="pull-right">{{ userStore.name }}</div>
-              </li>
-              <li class="list-group-item">
-                <svg-icon icon-class="email" />用户邮箱
-                <div class="pull-right" v-if="userStore.email">{{ userStore.email }}</div>
-                <div class="pull-right no-email" v-else><span style="vertical-align: -1px;">未填写</span> <el-button link
-                    type="primary" size="small" @click="upDateEmailInfo">更新</el-button></div>
-              </li>
-              <li class="list-group-item">
-                <svg-icon icon-class="date" />用户注册时间
-                <div class="pull-right">{{ dayjs(userStore.created_at).format('YYYY-MM-DD HH:mm:ss') }} </div>
-              </li>
-              <li class="list-group-item">
-                <svg-icon icon-class="time" />最后登录时间
-                <div class="pull-right">{{ dayjs(userStore.last_login).format('YYYY-MM-DD HH:mm:ss') }}</div>
-              </li>
-            </ul>
-          </div>
-        </el-card>
+    <el-row :gutter="20" class="main-content">
+      <el-col :span="6" :xs="24" class="sidebar-col">
+        <div class="sidebar-wrapper">
+          <el-card class="box-card">
+            <template v-slot:header>
+              <div class="clearfix">
+                <span>个人信息</span>
+              </div>
+            </template>
+            <div>
+              <ul class="list-group list-group-striped">
+                <li class="list-group-item">
+                  <svg-icon icon-class="user" />用户名称
+                  <div class="pull-right">{{ userStore.name }}</div>
+                </li>
+                <li class="list-group-item">
+                  <svg-icon icon-class="email" />用户邮箱
+                  <div class="pull-right" v-if="userStore.email">{{ userStore.email }}</div>
+                  <div class="pull-right no-email" v-else><span style="vertical-align: -1px;">未填写</span> <el-button link
+                      type="primary" size="small" @click="upDateEmailInfo">更新</el-button></div>
+                </li>
+                <li class="list-group-item">
+                  <svg-icon icon-class="date" />用户注册时间
+                  <div class="pull-right">{{ dayjs(userStore.created_at).format('YYYY-MM-DD HH:mm:ss') }} </div>
+                </li>
+                <li class="list-group-item">
+                  <svg-icon icon-class="time" />最后登录时间
+                  <div class="pull-right">{{ dayjs(userStore.last_login).format('YYYY-MM-DD HH:mm:ss') }}</div>
+                </li>
 
-        <el-card class="box-card carousel">
-          <template v-slot:header>
-            <div class="clearfix">
-              <span>最新上传图片文件Top5</span>
+                <li class="list-group-item">
+                  <svg-icon icon-class="online" />最后登录IP地址
+                  <div class="pull-right">{{ userStore.login_ip }}</div>
+                </li>
+              </ul>
             </div>
-          </template>
-          <div v-if="carouselData.length>0">
-            <Carousel ref="carouselRef" @change="handleChange" :imgs="carouselData" :autoPlay="true"></Carousel>
-            <div class="current">
-              <el-button type="primary"  @click="$event=>change(currentIndex-1)" :disabled="currentIndex===0">
-                &lt;
-              </el-button>
-              <span class="num">第{{currentIndex+1}}张</span>
-              <el-button type="primary" @click="$event=>change(currentIndex+1)" :disabled="currentIndex===carouselData.length-1">
-                &gt;
-              </el-button>
-            </div>
-          </div>
-          <div class="no-data-other-file" v-else>
-              <span>暂未上传图片类型文件</span>
-              <br>  
-              <el-button type="primary" link @click="goToUploadPage">去上传</el-button>
-            </div>
-        </el-card>
+          </el-card>
 
-        <el-card class="box-card other-card">
-          <template v-slot:header>
-            <div class="clearfix">
-              <span>最新上传其他文件Top5</span>
+          <el-card class="box-card carousel">
+            <template v-slot:header>
+              <div class="clearfix">
+                <span>最新上传图片文件Top5</span>
+              </div>
+            </template>
+            <div v-if="carouselData.length>0">
+              <Carousel ref="carouselRef" @change="handleChange" :imgs="carouselData" :autoPlay="true"></Carousel>
+              <div class="current">
+                <el-button type="primary"  @click="$event=>change(currentIndex-1)" :disabled="currentIndex===0">
+                  &lt;
+                </el-button>
+                <span class="num">第{{currentIndex+1}}张</span>
+                <el-button type="primary" @click="$event=>change(currentIndex+1)" :disabled="currentIndex===carouselData.length-1">
+                  &gt;
+                </el-button>
+              </div>
             </div>
-          </template>
-          <div>
-            <ol class="other-file-list" v-if="otherFileListData.length">
-              <li v-for="(file, index) in otherFileListData" :key="index" class="list-item">
-                <el-tooltip :content="file.file_name" placement="top" :disabled="!shouldShowTooltip(file.file_name)">
-                  {{file.file_name}}
-                  </el-tooltip>
-              </li>
-            </ol>
-
             <div class="no-data-other-file" v-else>
-              <span>暂未上传其他类型文件</span>
-              <br>  
-              <el-button type="primary" link @click="goToUploadPage">去上传</el-button>
+                <span>暂未上传图片类型文件</span>
+                <br>  
+                <el-button type="primary" link @click="goToUploadPage">去上传</el-button>
+              </div>
+          </el-card>
+
+          <el-card class="box-card other-card">
+            <template v-slot:header>
+              <div class="clearfix">
+                <span>最新上传其他文件Top5</span>
+              </div>
+            </template>
+            <div>
+              <ol class="other-file-list" v-if="otherFileListData.length">
+                <li v-for="(file, index) in otherFileListData" :key="index" class="list-item">
+                  <el-tooltip :content="file.file_name" placement="top" :disabled="!shouldShowTooltip(file.file_name)">
+                    {{file.file_name}}
+                    </el-tooltip>
+                </li>
+              </ol>
+
+              <div class="no-data-other-file" v-else>
+                <span>暂未上传其他类型文件</span>
+                <br>  
+                <el-button type="primary" link @click="goToUploadPage">去上传</el-button>
+              </div>
+              
+              
             </div>
-            
-             
-          </div>
-        </el-card>
+          </el-card>
+      </div>
       </el-col>
-      <el-col :span="18" :xs="24">
+
+      <el-col :span="18" :xs="24" class="content-col">
         <el-card class="file-box-card">
           <template v-slot:header>
             <div class="clearfix hd-title">
@@ -99,8 +107,15 @@
             <el-tab-pane label="我上传的文件" name="active">
               <el-table :data="fileListData" ref="multipleTableRef" row-key="id"  @selection-change="handleSelectionChange" border style="width: 100%">
                <!-- :selectable="selectable" -->
+                <template #empty>
+                  <div class="empty-tips">
+                    <svg-icon icon-class="empty"  class="empty-icon" />
+                    <span class="empty-text">暂无文件,请先去上传文件</span>
+                    
+                  </div>
+                </template>
                 <el-table-column type="selection"  width="55" fixed="left"/>
-                <el-table-column prop="id" label="id" width="60" align="center" fixed="left"/>
+                <el-table-column prop="id" label="Id" width="60" align="center" fixed="left"/>
 
                 <el-table-column prop="full_path" label="缩略图" align="center" fixed="left">
                   <template #default="scope">
@@ -177,7 +192,7 @@
                   </template>
                 </el-table-column>
               </el-table>
-              <div class="listBoxBottom">
+              <div class="listBoxBottom" v-if="totalActiveCount > 0">
                 <div class="totalText">共 {{ totalActiveCount }} 条数据</div>
                 <el-pagination size="small" background :current-page="pageActive" :page-size="10"
                   layout="prev, pager, next" @current-change="upDataCurPage" :total="totalActiveCount" class="mt-4">
@@ -187,7 +202,14 @@
 
             <el-tab-pane label="已删除的文件" name="deleted">
               <el-table :data="fileListDeletedData" border style="width: 100%">
-                <el-table-column prop="id" label="id" width="60" align="center" fixed="left"/>
+                <template #empty>
+                  <div class="empty-tips">
+                    <svg-icon icon-class="empty"  class="empty-icon" />
+                    <span class="empty-text">暂无数据</span>
+                    
+                  </div>
+                </template>
+                <el-table-column prop="id" label="Id" width="60" align="center" fixed="left"/>
                 <el-table-column prop="full_path" label="缩略图" align="center" fixed="left">
                   <template #default="scope">
                     <div v-if="isImage(scope.row.file_name)" class="thumbnail-container">
@@ -227,12 +249,12 @@
                     <div class="btn-group">
                       <el-button  type="primary" link @click="restoreFile(scope.row)">还原文件</el-button>
                       <el-divider direction="vertical" />
-                      <el-button  type="danger" link>彻底删除</el-button>
+                      <el-button  type="danger" link @click="completeDelete(scope.row)">彻底删除</el-button>
                     </div>
                   </template>
                 </el-table-column>
               </el-table>
-              <div class="listBoxBottom">
+              <div class="listBoxBottom" v-if="totalDeletedCount > 0">
                 <div class="totalText">共 {{ totalDeletedCount }} 条数据</div>
                 <el-pagination size="small" background :current-page="pageDeleted" :page-size="10"
                   layout="prev, pager, next" @current-change="upDataDeletedCurPage" :total="totalDeletedCount"
@@ -296,7 +318,8 @@ import {
   batchDeleteFile,
   getFile ,
   restoreFileById,
-  getOtherFileListTop5
+  getOtherFileListTop5,
+  completeDeleteFile
 } from "@/api/uploadfile";
 
 import {  updateUserEmail, getUserInfo } from "@/api/user";
@@ -375,7 +398,6 @@ const submitEmailForm = () => {
   emailFormRef.value.validate((valid) => {
     if (valid) {
       // 校验通过，执行更新邮箱逻辑
-      // console.log('邮箱校验通过:', user.value.email);
       updateUserEmail({ email: user.value.email }).then(res => {
         if(res.code === 200) {
           ElMessage({
@@ -657,6 +679,41 @@ const getOtherFileList = async () => {
 };
 
 
+// 彻底删除操作 
+const completeDelete = async (item) => {
+
+   try {
+    ElMessageBox.confirm('确定要彻底删除该文件吗？删除后将无法恢复！(将会删除数据库记录和服务器上面的文件,请谨慎操作)', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    completeDeleteFile({ filename: item.file_path }).then((res)=>{
+    if (res.success) {
+          ElMessage.success('彻底删除成功');
+          getFileListDeleted(pageDeleted.value);
+
+        } else {
+          throw new Error(res.message)
+        }
+      });
+  })
+  } catch {
+    ElMessage.error('删除失败')
+  }
+
+  // try {
+  //   const res = await deleteFileById(fileId);
+  //   if (res.code === 200) {
+  //     ElMessage.success('彻底删除成功');
+  //     getFileList();
+  //   }
+  // } catch (error) {
+  //   console.error('彻底删除失败:', error);
+  // }
+};
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -664,16 +721,54 @@ const getOtherFileList = async () => {
   padding-right: 20px;
 }
 
+.main-content {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - 100px); // 根据你的实际需要调整
+}
+
+.sidebar-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content-col {
+  display: flex;
+  flex-direction: column;
+}
+
 .box-card {
   margin-top: 20px;
   margin-left: 30px;
+  flex: 1;
 }
 
 
-.other-card{
-  margin-top:18px;
+.other-card {
+  margin-top: 18px;
+  flex: 1;
   :deep(.el-card__body) {
-    height:260px;
+    height: 260px;
+  }
+}
+
+.file-box-card {
+  margin-top: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  //height: calc(100% - 20px);
+  
+  :deep(.el-card__body) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -707,8 +802,16 @@ const getOtherFileList = async () => {
 
 .carousel{
   :deep(.el-card__body) {
-  background:#dedede;
+  background:#ffffff;
+  padding-top:10px;
+  padding-left:10px;
+  padding-right: 10px;
 
+  button{
+    height:20px;
+    box-sizing: border-box;
+    font-size:12px;
+  }
   }
 }
 
@@ -746,7 +849,7 @@ const getOtherFileList = async () => {
 
 .file-box-card {
   margin-top: 20px;
-  height: 1017px;
+
   position: relative;
 }
 
@@ -875,4 +978,15 @@ const getOtherFileList = async () => {
     font-size:12px;
   }
 }
+.empty-tips{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 450px;
+    .empty-icon{
+      font-size:50px;
+    }
+}
+
 </style>

@@ -124,6 +124,9 @@ exports.userLogin = async ctx => {
        // 更新最后登录时间
        await userModel.updateUserLastLogin(res[0].id, new Date());
 
+       // 更新登录IP地址
+       await userModel.updateUserLastLoginIp(res[0].id, ctx.request.ip);
+
         ctx.body = {
           code: 200,
           data: {

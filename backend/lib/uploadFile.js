@@ -148,6 +148,13 @@ exports.getOtherFileListPicTop5 = async (userId) => {
               ORDER BY upload_time DESC 
               LIMIT 5`;
     console.log('_sql999',_sql);
-  return query(_sql);
+    return query(_sql);
+}
 
+
+// 彻底删除文件
+exports.completeDeleteFile = async (userId,filepath) => {
+  // console.log('彻底删除',filepath);
+  // console.log(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
+  return query(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
 }
