@@ -22,7 +22,6 @@ var resObj = (code, msg, data) => {
 // 新增用户信息(注册)
 exports.insertUserData = async (ctx) => {
   try {
-    console.log('ctx.request', ctx.request.body);
     
     const { username, email, password } = ctx.request.body;
     
@@ -120,7 +119,6 @@ exports.userLogin = async ctx => {
       };
       
       const token = jwt.sign(userInfo, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
-      console.log('config.jwt.expiresIn', config.jwt.expiresIn);
        // 更新最后登录时间
        await userModel.updateUserLastLogin(res[0].id, new Date());
 
