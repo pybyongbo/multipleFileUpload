@@ -25,7 +25,7 @@ export default defineConfig({
         '@': join(__dirname, 'src'),
         '/image': '/src/assets/images',
       },
-      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
+      extensions: ['.vue','.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
     },
     // server: {
     // open: false,

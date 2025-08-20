@@ -305,7 +305,7 @@ import { useRoute, useRouter } from 'vue-router';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
-import Carousel from '@/components/Carousel/index.vue';
+import Carousel from '@/components/Carousel';
 import Watermark from '@/components/WaterMark/index.vue';
 import { isImage,bytesToKB } from '@/utils/tools';
 import { scrollTo } from '@/utils/scroll-to.js';
