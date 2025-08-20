@@ -2,11 +2,11 @@ const config = {
 
   // 数据库配置
   database: {
-    // DATABASE: "studentlist",
-    DATABASE: "nodejstest",
+    DATABASE: "studentlist",
+    // DATABASE: "nodejstest",
     USERNAME: "root",
-    // PASSWORD: "123456",
-    PASSWORD: "root",
+    PASSWORD: "123456",
+    // PASSWORD: "root",
     PORT: "3306",
     HOST: "localhost",
   },
