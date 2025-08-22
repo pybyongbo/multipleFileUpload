@@ -138,14 +138,11 @@ const previewImage = (index, file) => {
 const resetUploadState = () => {
   uploadedCount.value = 0;
   totalFiles.value = 0;
-  // if (uploadRef.value) {
-  //   uploadRef.value.clearFiles();
-  // }
+
 };
 
 // 成功上传
 const handleSuccess = (a, b) => {
-  console.log('a,b', a, b);
   // 检查是否所有文件都已上传完成
   if (uploadedCount.value === totalFiles.value && totalFiles.value > 0) {
     ElMessage.success('文件上传成功！');
@@ -185,6 +182,7 @@ const deleteFile = async (file, index) => {
       previews.value = previews.value.filter(f => f.originalName !== file.originalName)
       fileList.value = fileList.value.filter(f => f.name !== file.originalName)
       ElMessage.success('删除成功')
+
     } else {
       throw new Error()
     }

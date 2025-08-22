@@ -104,14 +104,13 @@
             <el-button type="primary" size="small" @click="batchDownload"><el-icon><Download /></el-icon>批量下载文件</el-button>
           </div>
           <el-tabs v-model="selectedTab">
-            <el-tab-pane label="我上传的文件" name="active">
+            <el-tab-pane :label="`我上传的文件(${totalActiveCount})`" name="active">
               <el-table :data="fileListData" ref="multipleTableRef" row-key="id"  @selection-change="handleSelectionChange" border style="width: 100%">
                <!-- :selectable="selectable" -->
                 <template #empty>
                   <div class="empty-tips">
                     <svg-icon icon-class="empty"  class="empty-icon" />
                     <span class="empty-text">暂无文件,请先去上传文件</span>
-                    
                   </div>
                 </template>
                 <el-table-column type="selection"  width="55" fixed="left"/>
@@ -200,13 +199,12 @@
               </div>
             </el-tab-pane>
 
-            <el-tab-pane label="已删除的文件" name="deleted">
+            <el-tab-pane :label="`已删除的文件(${totalDeletedCount})`" name="deleted">
               <el-table :data="fileListDeletedData" border style="width: 100%">
                 <template #empty>
                   <div class="empty-tips">
                     <svg-icon icon-class="empty"  class="empty-icon" />
                     <span class="empty-text">暂无数据</span>
-                    
                   </div>
                 </template>
                 <el-table-column prop="id" label="Id" width="60" align="center" fixed="left"/>
@@ -267,7 +265,11 @@
       </el-col>
     </el-row>
     <Teleport to="body">
-        <el-image-viewer v-if="showPreview" :url-list="curUrlList" show-progress @close="showPreview = false" />
+        <el-image-viewer 
+        v-if="showPreview" 
+        :url-list="curUrlList"
+        :initial-index="initialIndex" 
+        show-progress @close="showPreview = false" />
     </Teleport>
 
     <!-- 更新邮箱信息弹框 -->
@@ -300,6 +302,7 @@
 import { ref,reactive, watch, toRefs,onMounted } from 'vue';
 import useUserStore from '@/store/modules/user'
 import { dayjs,ElMessage, ElMessageBox } from 'element-plus';
+import {WarningFilled} from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router';
 
 import JSZip from "jszip";
@@ -336,6 +339,8 @@ const selectedTab = ref("active");
 
 const curUrlList = ref([]); // 用于存储预览的图片列表
 const showPreview = ref(false); // 控制预览弹窗的显示
+
+const initialIndex = ref(0); // 添加这行
 
 const fileListData = ref([]); // 存储文件列表数据
 const totalActiveCount = ref(0); // 存储总的活动文件数
@@ -439,7 +444,13 @@ const handleSelectionChange = (val) => {
 }
 
 const previewImage = (url) => {
-  curUrlList.value = [url]; // 设置预览的图片列表
+
+   const imageFiles = fileListData.value.filter(item => isImage(item.file_name));
+  // 设置预览的图片列表
+  curUrlList.value = imageFiles.map(item => item.full_path);
+  // 找到当前点击图片的索引
+  const index = imageFiles.findIndex(item => item.full_path === url);
+  initialIndex.value = index !== -1 ? index : 0;
   showPreview.value = true; // 显示预览弹窗
 };
 
@@ -506,6 +517,7 @@ const goToUploadPage = () => {
 // 初始化加载
 onMounted(() => {
   getFileList(1);
+  getFileListDeleted(1);
   getCarouselTop5();
   getOtherFileList();
 });
@@ -550,7 +562,7 @@ const batchDelete = () => {
 const deleteSingleFile =async (item,index) =>{
   console.log('item',item);
   try {
-    ElMessageBox.confirm('确定要删除选中的文件吗？', '提示', {
+    ElMessageBox.confirm('确定要删除选中的文件吗？(将文件放入回收站,可还原)', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
@@ -560,6 +572,7 @@ const deleteSingleFile =async (item,index) =>{
           ElMessage.success('删除成功');
           getFileList(pageActive.value);
           getCarouselTop5();
+          getFileListDeleted(1);
         } else {
           throw new Error(res.message)
         }
@@ -681,12 +694,27 @@ const getOtherFileList = async () => {
 
 // 彻底删除操作 
 const completeDelete = async (item) => {
-
+// '确定要彻底删除该文件吗？删除后将无法恢复！(将会删除数据库记录和服务器上面的文件,请谨慎操作)'
    try {
-    ElMessageBox.confirm('确定要彻底删除该文件吗？删除后将无法恢复！(将会删除数据库记录和服务器上面的文件,请谨慎操作)', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
+    ElMessageBox.confirm(`<div style="text-align: center;" class="delete-confirm-tips">
+        
+        <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333;text-align:left;padding-left:30px;">
+          确定要彻底删除该文件吗？
+        </div>
+        <div style="color: #f56c6c; font-size: 14px; margin-bottom: 20px; font-weight: bold;text-align: left;">
+          删除后将无法恢复！(将会删除数据库记录和服务器上面的文件,请谨慎操作)
+        </div>
+        <div style="background: #fef0f0; border-radius: 4px; padding: 12px; text-align: left; font-size: 13px;">
+          <div style="margin-bottom: 8px;"><strong>文件名:</strong></div>
+          <div style="word-break: break-all; color: #666;">${item.file_name}</div>
+        </div>
+      </div>`,
+        {
+          dangerouslyUseHTMLString: true,
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          customClass: 'custom-delete-confirm'
   }).then(() => {
     completeDeleteFile({ filename: item.file_path }).then((res)=>{
     if (res.success) {
@@ -987,6 +1015,23 @@ const completeDelete = async (item) => {
     .empty-icon{
       font-size:50px;
     }
+}
+
+</style>
+
+<style lang="scss">
+
+.custom-delete-confirm{
+  .el-message-box__container{
+    display: block;
+    position: relative;
+
+    .el-icon.el-message-box__status.el-message-box-icon--warning{
+      position: absolute;
+      top: 0px;
+      left: 0px;
+    }
+  }
 }
 
 </style>
