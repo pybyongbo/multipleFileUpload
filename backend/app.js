@@ -2,9 +2,13 @@ const Koa = require('koa')
 const app = new Koa()
 const views = require('koa-views')
 const json = require('koa-json')
+const path = require('path');
 const onerror = require('koa-onerror')
-const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+app.use(require('koa-static')(__dirname + '/public'))
+// 添加 koa-body,使用解构赋值的方式导入 koaBody
+
+const { koaBody } = require('koa-body')
 
 const cors = require('koa2-cors');
 const jwt = require('koa-jwt');
@@ -14,6 +18,9 @@ const index = require('./routes/index')
 const users = require('./routes/users')
 
 const upload = require('./routes/upload')
+
+
+const bigupload = require('./routes/bigupload.js')
 
 // error handler
 onerror(app)
@@ -46,15 +53,30 @@ app.use(
 
 
 // middlewares
-app.use(bodyparser({
-  jsonLimit: '50mb',     // 默认通常是 1mb
-  formLimit: '50mb',     // 默认通常是 500kb
-  textLimit: '50mb',     // 文本数据限制
-  enableTypes:['json', 'form', 'text']
-}))
+// app.use(bodyparser({
+//   jsonLimit: '50mb',     // 默认通常是 1mb
+//   formLimit: '50mb',     // 默认通常是 500kb
+//   textLimit: '50mb',     // 文本数据限制
+//   enableTypes:['json', 'form', 'text']
+// }))
+
+app.use(koaBody({
+  multipart: true, // 支持文件上传
+  json: true,      // 支持 JSON 格式
+  formidable: {
+    maxFileSize: 200 * 1024 * 1024, // 设置最大文件大小为 200MB
+    keepExtensions: true,           // 保持文件扩展名
+    // uploadDir: path.join((__dirname + '/public'), 'uploads'),
+  },
+  // 设置大小限制
+  jsonLimit: '50mb',
+  formLimit: '50mb',
+  textLimit: '50mb'
+}));
+
 app.use(json())
 app.use(logger())
-app.use(require('koa-static')(__dirname + '/public'))
+
 
 app.use(views(__dirname + '/views', {
   extension: 'pug'
@@ -88,7 +110,8 @@ app.use(
       /^\/logout/,
       // /^\/upload/,
       /^\/public/,
-      /^\/favicon.ico/
+      /^\/favicon.ico/,  
+      /^\/mergeSlice/
     ]
   })
 );
@@ -107,6 +130,11 @@ app.use(users.routes(), users.allowedMethods())
 
 // upload
 app.use(upload.routes(), upload.allowedMethods())
+
+// 分片上传
+app.use(bigupload.routes(), bigupload.allowedMethods())
+
+
 
 // error-handling
 app.on('error', (err, ctx) => {

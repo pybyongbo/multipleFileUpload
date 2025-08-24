@@ -1,7 +1,6 @@
 const router = require('koa-router')();
 const multer = require('koa-multer');
 const path = require('path');
-const sharp = require('sharp');
 const fs = require('fs');
 
 const uploadDir = path.join(__dirname, '../public/uploads');
@@ -27,6 +26,13 @@ const upload = multer({ storage });
 
 // 文件信息入库
 router.post('/upload', upload.array('files', 5), fileController.uploadFile);
+
+// router.post('/upload', upload.single('file'), fileController.uploadFile);
+
+
+
+
+
 
 // 删除文件接口
 router.post('/delete', fileController.deleteFile);

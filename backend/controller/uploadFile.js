@@ -235,108 +235,97 @@ async function addWatermark(imagePath, watermarkText) {
 
 exports.uploadFile = async (ctx) => {
 
-    try {
-    const files = ctx.req.files;
-    const processedFiles = [];
+try {
+    // --- 3. 从 ctx.request.files 中获取上传的文件 ---
+    // 假设前端 FormData 中使用的 key 是 'file'
+    // 例如: formData.append('file', fileObject);
+    const file = ctx.request.files.file;
 
-    for (const file of files) {
-      // 检查是否为图片文件
-      if (file.mimetype.startsWith('image/')) {
-        const now = new Date();
-        // 为图片添加水印
-        const watermarkedImagePath = await addWatermark(
-          file.path,
-          `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
-        );
-        processedFiles.push({
-          originalName: file.originalname,
-          fileName: `${path.basename(file.path)}`,
-          filePath: `/uploads/${path.basename(file.path)}`,
-          fileSize: file.size,
-          mimeType: file.mimetype,
-          fileExtension: path.extname(file.originalname),
-          uploadTime: new Date(),
-          uploaderId: ctx.state.user.id, // 假设 ctx.state.user.id 是当前用户的 ID
-          uploaderIp: ctx.request.ip,
-          isWatermarked: 1,
-          status: 'active',
-          description: '',
-          path: `${ctx.request.protocol}://${
-            ctx.request.host
-          }/uploads/${path.basename(watermarkedImagePath)}`,
-          url: `/uploads/${path.basename(file.path)}`,
-          full_path:`${ctx.request.protocol}://${
-            ctx.request.host
-          }/uploads/${path.basename(file.path)}`, 
-          // mimetype: file.mimetype,
-        });
-      } else {
-        // 非图片文件直接返回
-        processedFiles.push({
-          // originalName: file.originalname,
-          // mimetype: file.mimetype,
-          // url: `/uploads/${path.basename(file.path)}`,
-          // path: `${ctx.request.protocol}://${
-          //   ctx.request.host
-          // }/uploads/${path.basename(file.path)}`, // 兼容 http 和 https protocol = ctx.request.protocol;
-          originalName: file.originalname,
-          fileName: `${path.basename(file.path)}`,
-          filePath: `/uploads/${path.basename(file.path)}`,
-          fileSize: file.size,
-          mimeType: file.mimetype,
-          fileExtension: path.extname(file.originalname),
-          uploadTime: new Date(),
-          uploaderId: ctx.state.user.id, // 假设 ctx.state.user.id 是当前用户的 ID
-          uploaderIp: ctx.request.ip,
-          isWatermarked: 1,
-          status: 'active',
-          description: '',
-          path: `${ctx.request.protocol}://${
-            ctx.request.host
-          }/uploads/${path.basename(file.path)}`,
-          url: `/uploads/${path.basename(file.path)}`,
-          full_path:`${ctx.request.protocol}://${
-            ctx.request.host
-          }/uploads/${path.basename(file.path)}`, 
-          mimetype: file.mimetype,
-        });
-      }
+    console.log('file',file);
+
+      const processedFiles = [];
+
+    // 如果没有获取到文件，返回错误信息
+    if (!file) {
+      ctx.status = 400; // Bad Request
+      ctx.body = {
+        code: 1,
+        message: '请上传文件！'
+      };
+      return;
     }
-    // 文件信息入库
+
+    
+    const dateFolderPath = uploadDir;
+
+    // 检查日期文件夹是否存在，不存在则创建
+    if (!fs.existsSync(dateFolderPath)) {
+      fs.mkdirSync(dateFolderPath, { recursive: true });
+    }
+    // b. 生成时间戳
+    const timestamp = Date.now();
+
+    // c. 生成新的文件名
+    const newFilename = `${timestamp}-${file.originalFilename}`;
+
+    // 定义新的文件路径
+    const newFilePath = path.join(dateFolderPath, newFilename);
+
+    // 使用 fs.renameSync (同步) 或 fs.promises.rename (异步) 移动文件
+    // 这里使用异步方式，避免阻塞事件循环
+    await fs.promises.rename(file.filepath, newFilePath);
+
+
+    processedFiles.push({
+        originalName: file.originalFilename,
+          fileName: newFilename,
+          filePath:`/uploads/${newFilename}`,
+          fileSize: file.size,
+          mimeType: file.mimetype,
+          fileExtension: path.extname(newFilename),
+          uploadTime: new Date(),
+          uploaderId: ctx.state.user.id, // 假设 ctx.state.user.id 是当前用户的 ID
+          uploaderIp: ctx.request.ip,
+          isWatermarked: 1,
+          status: 'active',
+          description: '',
+          path: `${ctx.request.protocol}://${
+            ctx.request.host
+          }/uploads/${newFilename}`,
+          url: `/uploads/${newFilename}`,
+          full_path:`${ctx.request.protocol}://${
+            ctx.request.host
+          }/uploads/${newFilename}`, 
+    });
+
+        // 文件信息入库
     await fileModel.insertUploadInfo(processedFiles); // 假设 ctx.state.user.id 是当前用户的 ID
+    
+
+    // --- 5. 向客户端返回成功响应 ---
 
     ctx.body = {
       success: true,
-      code:200,
+      code: 200,
+      message: '文件上传成功！',
       files: processedFiles,
+   
     };
+
   } catch (error) {
-    console.log('error',error);
+    // --- 6. 错误处理 ---
+    console.error('文件上传失败:', error);
+    ctx.status = 500; // Internal Server Error
+    ctx.body = {
+      code: -1,
+      message: '服务器内部错误，文件上传失败。',
+      error: error.message // 在开发环境中可以返回具体错误
+    };
   }
 
 }
 
-// 删除文件接口
-// router.post('/delete', async (ctx) => {
-//   const { filename } = ctx.request.body;
-//   if (!filename) {
-//     ctx.body = { success: false, msg: '文件名不能为空' };
-//     return;
-//   }
 
-//   const filePath = path.join(__dirname, `../public/${filename}`);
-
-//   try {
-//     if (fs.existsSync(filePath)) {
-//       fs.unlinkSync(filePath);
-//       ctx.body = { success: true };
-//     } else {
-//       ctx.body = { success: false, msg: '文件不存在' };
-//     }
-//   } catch (err) {
-//     ctx.body = { success: false, msg: '删除失败' };
-//   }
-// });
 
 
 exports.deleteFile = async (ctx) => {

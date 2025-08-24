@@ -53,10 +53,11 @@ function handleCommand(command) {
       <router-link to="/uploadfile">首页</router-link> 
       <router-link to="/uploadfileBase64">base64上传</router-link> 
       <router-link to="/uploadfileBinary">二进制上传</router-link>
+
+      <router-link to="/uploadfileChunk">大文件分片上传</router-link>
+
       <router-link to="/personal">个人中心</router-link>
 
-       <!-- <router-link to="/uploadfile">首页</router-link> 
-      <router-link to="/personal">个人中心</router-link> -->
 
     </div>
 </div>

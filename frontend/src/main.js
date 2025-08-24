@@ -16,10 +16,14 @@ import 'virtual:svg-icons-register'
 import SvgIcon from './components/SvgIcon/index.vue';
 import elementIcons from './components/SvgIcon/svgicon.js'
 
+import localforage from "localforage"
+localforage.config({ name: 'db' })
+
 
 
 const app = createApp(App);
 directive(app)
+app.config.globalProperties.$localForage = localforage
 app.use(store)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)

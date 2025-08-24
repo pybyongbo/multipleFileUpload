@@ -13,6 +13,9 @@ import Login from '@/views/login.vue';
 import Register from '@/views/register.vue';
 import Personal from '../src/views/personal.vue';
 
+// 大文件分片上传
+import UploadfileChunk from '@/views/uploadfileChunk.vue';
+
 const routes = [
   {
     path: '/login',
@@ -92,6 +95,23 @@ const routes = [
         component: Personal,
         meta: { 
           title: '个人中心',
+          requiresAuth: true 
+        }
+      }
+    ]
+  },
+  // UploadfileChunk
+  {
+   path: '/uploadfileChunk',
+    component: Layout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'uploadfileChunk',
+        component: UploadfileChunk,
+        meta: { 
+          title: '大文件分片上传',
           requiresAuth: true 
         }
       }

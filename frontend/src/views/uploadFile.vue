@@ -64,6 +64,7 @@ import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { uploadFile, deleteUploadFile } from "@/api/uploadfile";
+import { getToken } from '@/utils/auth'
 
 const uploadMaxCount = 5; // 最大上传文件数
 
@@ -87,7 +88,7 @@ const cpreviewsList = computed(() => {
 // 上传拦截：自定义上传逻辑
 const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => {
   const formData = new FormData()
-  formData.append('files', file)
+  formData.append('file', file)
 
   try {
 
@@ -98,7 +99,7 @@ const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => 
         onProgress({ percent })
       },
     });
-
+    console.log('res',res);
     const uploaded = res && res.files[0]
     previews.value.push(uploaded)
     fileList.value.push({
@@ -109,6 +110,7 @@ const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => 
     uploadedCount.value++;
 
   } catch (err) {
+    console.log('err',err);
     ElMessage.error('上传失败')
     onError(err)
   }

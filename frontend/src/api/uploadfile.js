@@ -1,5 +1,5 @@
 import http,{ service } from '@/utils/request'
-
+import axios from 'axios'
 // 上传文件
 export const uploadFile = params => {
   return http.post("/upload", params);
@@ -95,4 +95,27 @@ export const uploadFileBinary = (params,headers) => {
 
 export const completeDeleteFile = (params) => {
   return http.post("/completedelete", params);
+}
+
+
+// update, checkFile, mergeSlice,  clearDir
+
+export const update = (data, headers) => {
+  // const CancelToken = axios.CancelToken
+  return service.post('/update', data, {...headers})
+};
+
+
+export const checkFile = params => {
+  console.log('checkFilecheckFilecheckFile');
+   return http.post('/checkFile', params)
+}
+
+export function mergeSlice(data, config = {}) {
+  // 不加 /bigupload 前缀
+  return service.post('/mergeSlice', data, config)
+}
+
+export const clearDir = () => {
+  return http.post('/clearDir')
 }
