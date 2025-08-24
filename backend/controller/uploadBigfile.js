@@ -18,7 +18,6 @@ if (!fs.existsSync(finishPath)) {
   fs.mkdirSync(finishPath, { recursive: true })
 }
 
-// const multiparty = require("multiparty")
 
 // 大文件分片上传接口
 
@@ -72,7 +71,6 @@ exports.update = async (ctx) => {
 
 
 exports.mergeSlice = async (ctx) => {
-  console.log('mergeSlice controller called');
   try {
     let { folderPath, fileMd5, justMd5, nameSuffix, fileName } = ctx.request.body;
     await new Promise((resolve, reject) => {
@@ -135,26 +133,45 @@ exports.checkFile = async (ctx) => {
 
 
 exports.clearDir = async (ctx) => {
-  try {
-    // 清空 cache 目录
-    if (fs.existsSync(cachePath)) {
-      fs.rmSync(cachePath, { recursive: true, force: true });
+  // try {
+  //   // 清空 cache 目录
+  //   if (fs.existsSync(cachePath)) {
+  //     fs.rmSync(cachePath, { recursive: true, force: true });
+  //   }
+    
+  //   // 清空 finish 目录
+  //   if (fs.existsSync(finishPath)) {
+  //     fs.rmSync(finishPath, { recursive: true, force: true });
+  //   }
+    
+  //   // 重新创建目录
+  //   fs.mkdirSync(cachePath, { recursive: true });
+  //   fs.mkdirSync(finishPath, { recursive: true });
+    
+  //   ctx.body = {result: 1, msg: '清空成功'};
+  // } catch (err) {
+  //   console.log('clear err', err);
+  //   ctx.body = {result: -1, msg: '清空失败', data: err.message};
+  // }
+   try{
+        let finishDir = path.join(staticPath,'finish')
+        let cacheDir = path.join(staticPath,'cache')
+        const files = fs.readdirSync(finishDir)
+        const filesB = fs.readdirSync(cacheDir)
+        for (const file of files) {
+            // 注意:git是不能接收空文件夹的,.gitignore文件相当于空文件夹的占位文件夹,不能删它,如果删了它文件夹一空git会主动把你的空文件删掉
+            file !== '.gitignore' ? fs.unlinkSync(`${finishDir}/${file}`) : ''
+        }
+        for (const file of filesB) {
+            // node.js不支持删除有文件的文件夹,这种情况下就只能递归处理了
+            file !== '.gitignore' ? rmdirSync(`${cacheDir}/${file}`) : ''
+        }
+        // res.send({result:1,msg:'清空成功'})
+        ctx.body = {result: 1, msg: '清空成功'}
+
+    }catch(err){
+      ctx.body = {result: -1, msg: '清空失败', data: err.message};
     }
-    
-    // 清空 finish 目录
-    if (fs.existsSync(finishPath)) {
-      fs.rmSync(finishPath, { recursive: true, force: true });
-    }
-    
-    // 重新创建目录
-    fs.mkdirSync(cachePath, { recursive: true });
-    fs.mkdirSync(finishPath, { recursive: true });
-    
-    ctx.body = {result: 1, msg: '清空成功'};
-  } catch (err) {
-    console.log('clear err', err);
-    ctx.body = {result: -1, msg: '清空失败', data: err.message};
-  }
 }
 
 // 合并分片
