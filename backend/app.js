@@ -15,6 +15,7 @@ const jwt = require('koa-jwt');
 const config = require('./config/index.js');
 
 const index = require('./routes/index')
+
 const users = require('./routes/users')
 
 const upload = require('./routes/upload')
@@ -76,13 +77,10 @@ app.use(koaBody({
 
 app.use(json())
 app.use(logger())
-
-
 app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
 //  身份认证错误中间件
-// 身份认证错误中间件
 app.use(async (ctx, next) => {
   return next().catch(err => {
     if (err.status === 401) {

@@ -39,6 +39,10 @@ const props = defineProps({
   preventInteraction: {
     type: Boolean,
     default: false
+  },
+  rotate: {
+    type: Number,
+    default: -45
   }
 });
 
@@ -73,7 +77,7 @@ watchEffect(() => {
 
   div.style.color = `${props.color}`;
   // 覆盖到同级的上一个元素
-  div.style.zIndex = 1;
+  div.style.zIndex = 1111111;
 
   // 绝对定位
   div.style.position = 'absolute';

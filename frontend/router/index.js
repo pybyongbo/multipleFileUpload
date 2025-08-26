@@ -43,16 +43,7 @@ const routes = [
           title: '文件上传',
           requiresAuth: true 
         }
-      }
-    ]
-  },
-
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/uploadfileBase64',
-    meta: { requiresAuth: true },
-    children: [
+      },
       {
         path: '/uploadfileBase64',
         name: 'uploadfileBase64',
@@ -61,17 +52,8 @@ const routes = [
           title: '文件上传',
           requiresAuth: true 
         }
-      }
-    ]
-  },
-
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/uploadfileBinary',
-    meta: { requiresAuth: true },
-    children: [
-      {
+      },
+       {
         path: '/uploadfileBinary',
         name: 'uploadfileBinary',
         component: UploadfileBinary,
@@ -79,18 +61,18 @@ const routes = [
           title: '文件上传',
           requiresAuth: true 
         }
-      }
-    ]
-  },
-
-  // 
-  {
-    path: '/personal',
-    component: Layout,
-    meta: { requiresAuth: true },
-    children: [
+      },
+       {
+        path: '/uploadfileChunk',
+        name: 'uploadfileChunk',
+        component: UploadfileChunk,
+        meta: { 
+          title: '大文件分片上传',
+          requiresAuth: true 
+        }
+      },
       {
-        path: '',
+        path: '/personal',
         name: 'personal',
         component: Personal,
         meta: { 
@@ -100,23 +82,8 @@ const routes = [
       }
     ]
   },
-  // UploadfileChunk
-  {
-   path: '/uploadfileChunk',
-    component: Layout,
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: '',
-        name: 'uploadfileChunk',
-        component: UploadfileChunk,
-        meta: { 
-          title: '大文件分片上传',
-          requiresAuth: true 
-        }
-      }
-    ]
-  }
+
+  
 ];
 
 const router = createRouter({
