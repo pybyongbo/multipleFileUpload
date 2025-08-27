@@ -746,13 +746,22 @@ const completeDelete = async (item) => {
 
 <style lang="scss" scoped>
 .app-container {
-  padding-right: 20px;
+  //padding-right: 20px;
+  height: calc(100vh - 80px);
+  padding-top: 0px;
+  //min-height: calc(100vh - 60px); /* 减去导航栏高度 */
+  box-sizing: border-box;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding-bottom:120px;
 }
+
+
 
 .main-content {
   display: flex;
   align-items: stretch;
-  min-height: calc(100vh - 100px); // 根据你的实际需要调整
+  min-height: calc(100vh - 60px); // 根据你的实际需要调整
 }
 
 .sidebar-col {

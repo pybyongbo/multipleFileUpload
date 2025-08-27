@@ -33,7 +33,8 @@
     <h4>图片文件:</h4>
     <ul>
       <li v-for="(file, index) in cpreviewsList.pictureList" :key="index" class="list-item">
-        <img :src="file.path" :alt="file" @click="previewImage(index, file.path)"
+
+        <img :src="file.path" :alt="file.fileName" @click="previewImage(index, file.path)"
           style="max-width: 200px; margin-bottom: 10px;" />
         <div class="btn-group">
           <el-button size="small" type="primary" @click="previewImage(index, file.path)">

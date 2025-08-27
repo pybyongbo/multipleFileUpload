@@ -43,138 +43,194 @@ function handleCommand(command) {
 
 <template>
   <div class="nav-wrapper">
-
-<div class="nav-left">
-    <div class="logo">
-        <h1>多文件上传系统</h1>
+    <div class="nav-left">
+      <div class="logo">
+        <h1>📁 多文件上传系统</h1>
+      </div>
+      <div class="nav-menu">
+        <router-link to="/uploadfile" class="nav-link">
+          <i class="el-icon-folder"></i>
+          首页
+        </router-link> 
+        <router-link to="/uploadfileBase64" class="nav-link">
+          <i class="el-icon-picture"></i>
+          Base64上传
+        </router-link> 
+        <router-link to="/uploadfileBinary" class="nav-link">
+          <i class="el-icon-data-line"></i>
+          二进制上传
+        </router-link>
+        <router-link to="/uploadfileChunk" class="nav-link">
+          <i class="el-icon-upload"></i>
+          大文件分片上传
+        </router-link>
+        <router-link to="/personal" class="nav-link">
+          <i class="el-icon-user"></i>
+          个人中心
+        </router-link>
+      </div>
     </div>
-    <div class="nav-menu">
-
-      <router-link to="/uploadfile">首页</router-link> 
-      <router-link to="/uploadfileBase64">base64上传</router-link> 
-      <router-link to="/uploadfileBinary">二进制上传</router-link>
-
-      <router-link to="/uploadfileChunk">大文件分片上传</router-link>
-
-      <router-link to="/personal">个人中心</router-link>
-
-
-    </div>
-</div>
    
-
-     <el-dropdown @command="handleCommand" class="avatar-container right-menu-item hover-effect "  trigger="hover">
-    <div class="avatar-wrapper">
-      <span class="user-nickname">
-      <el-avatar style="width:24px;height:24px;vertical-align: -4px;margin-right:3px;">
+    <el-dropdown @command="handleCommand" class="avatar-container" trigger="hover">
+      <div class="avatar-wrapper">
+        <span class="user-nickname">
+          <!-- <el-avatar size="small" icon="el-icon-user" class="user-avatar" /> -->
+           <el-avatar style="width:24px;height:24px;vertical-align: -4px;margin-right:3px;">
         <svg-icon icon-class="user"  class="el-input__icon input-icon" />
       </el-avatar>
-        {{ userStore.name }} 
-      </span>
-    </div>
-    <template #dropdown>
-      <el-dropdown-menu>
-        <router-link to="/personal">
-          <el-dropdown-item>个人中心</el-dropdown-item>
-        </router-link>
-        <el-dropdown-item divided command="logout">
-          <span>退出登录</span>
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
-
+          {{ userStore.name }} 
+          <i class="el-icon-arrow-down"></i>
+        </span>
+      </div>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <router-link to="/personal">
+            <el-dropdown-item>
+              <i class="el-icon-user"></i>
+              个人中心
+            </el-dropdown-item>
+          </router-link>
+          <el-dropdown-item divided command="logout">
+            <i class="el-icon-switch-button"></i>
+            <span>退出登录</span>
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
   </div>
- 
 </template>
 
 <style lang="scss" scoped>
 
-.nav-wrapper{
+.nav-wrapper {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
-  height: 50px;
-  background: #dedede;
-  line-height: 50px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  padding: 0 20px;
+  box-sizing: border-box;
+  position: fixed; /* 固定定位 */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* 确保在最上层 */
 
-  .nav-left{
+  .nav-left {
     display: flex;
     align-items: center;
-    .logo{
-      margin-right: 24px;
-      h1{
-        font-size:20px;
-        font-weight: normal;
-        margin-left:34px;
+    
+    .logo {
+      margin-right: 30px;
+      h1 {
+        font-size: 22px;
+        font-weight: 600;
+        color: white;
+        margin: 0;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       }
     }
-    .nav-menu{
+    
+    .nav-menu {
       display: flex;
       align-items: center;
-      a{
-        margin-right: 20px;
-        font-size:14px;
-        color:var(--el-color-primary);
-        position: relative;
-        &::after{
-          content: '';
-          display: inline-block;
-          border-left:1px solid #fff;
-          height: 12px;
-          position: absolute;
-          top: 20px;
-          margin-left: 10px;
+      gap: 5px;
+      
+      .nav-link {
+        padding: 8px 16px;
+        margin: 0 8px;
+        border-radius: 20px;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+          transform: translateY(-1px);
         }
-        &:last-child::after{
-          display: none;
+        
+        &.router-link-active {
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          font-weight: 600;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
-        &.router-link-active{
-          font-weight: bold;
-          color: var(--el-color-danger);
-          text-decoration: underline;
+        
+        i {
+          font-size: 16px;
         }
       }
     }
   }
 }
+
 .avatar-container {
-  margin-right: 0px;
-  padding-right: 30px;
-
-  background: #dedede;
-  line-height: 50px;
-  display: flex;
-  justify-content: flex-end;
-
   .avatar-wrapper {
-    margin-top: 10px;
-    right: 5px;
-    position: relative;
-
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    
     .user-avatar {
-      cursor: pointer;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+      margin-right: 10px;
     }
-
+    
     .user-nickname {
-      cursor: pointer;
-      position: relative;
-      left: 5px;
-      bottom: 10px;
-      font-size: 14px;
-      font-weight: bold;
+      color: white;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      
+      i {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+      }
     }
-
-    i {
-      cursor: pointer;
-      position: absolute;
-      right: -20px;
-      top: 25px;
-      font-size: 12px;
+    
+    &:hover {
+      .user-nickname i {
+        transform: rotate(180deg);
+      }
     }
   }
 }
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .nav-wrapper {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+    
+    .nav-left {
+      flex-direction: column;
+      width: 100%;
+      
+      .logo {
+        margin: 10px 0;
+      }
+      
+      .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        
+        .nav-link {
+          margin: 5px;
+          padding: 6px 12px;
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}
+
+
 </style>

@@ -6,7 +6,7 @@ export default function useWatermarkBg(props){
   // 应该这样处理：
 
   return computed(() => {
-    const { text, fontSize, gap, color } = props;
+    const { text, fontSize, gap, color ,rotate} = props;
     
     if (!text) {
       return {
@@ -41,7 +41,7 @@ export default function useWatermarkBg(props){
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
     // 倾斜文本
-    ctx.rotate(Math.PI / 180 * -45);
+    ctx.rotate(Math.PI / 180 * rotate);
     ctx.fillStyle = color || 'rgba(0, 0, 0, 0.15)';
     ctx.font = font;
     ctx.textAlign = 'center';
