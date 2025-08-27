@@ -1028,6 +1028,10 @@ const completeDelete = async (item) => {
   flex: 1;
   display: flex;
   flex-direction: column;
+
+  :deep(.el-card__header) {
+    padding-right: 0;
+  }
   
   :deep(.el-card__body) {
     flex: 1;
@@ -1114,6 +1118,7 @@ const completeDelete = async (item) => {
 .searchForm{
    :deep(.el-form-item) {
     margin-bottom: 0;
+    margin-right:5px;
    }
 }
 
@@ -1137,7 +1142,7 @@ const completeDelete = async (item) => {
   align-items: center;
 
   .el-button {
-    margin-right: 10px;
+    margin-right: 0px;
   }
 }
 
