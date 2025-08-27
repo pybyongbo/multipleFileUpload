@@ -249,7 +249,7 @@ const inputChange = async (e) => {
       slicesUpdate(inTaskArrItem)
     } else {
       try {
-        // debugger
+
         const resB = await checkFile({ md5: fileMd5, size: inTaskArrItem.fileSize })
         const { result } = resB
         // 返回1说明服务器没有
