@@ -30,16 +30,12 @@ router.post('/upload', upload.array('files', 5), fileController.uploadFile);
 // router.post('/upload', upload.single('file'), fileController.uploadFile);
 
 
-
-
-
-
 // 删除文件接口
 router.post('/delete', fileController.deleteFile);
 
 
 // 获取当前用户上传的文件列表
-router.get('/fileList', fileController.getFileListByUserId);
+router.post('/fileList', fileController.getFileListByUserId);
 
 
 router.get('/fileListDeleted', fileController.getFileListDeletedByUserId);
@@ -71,6 +67,14 @@ router.post('/uploadFileBinary', upload.array('files', 5), fileController.upload
 
 // 彻底删除文件操作
 router.post('/completedelete', fileController.completeDeleteFile);
+
+
+// 查询上传所有文件的类型数据
+router.get('/getFileType', fileController.getFileTypeList);
+
+
+// 查询上传文件/删除文件总数
+router.get('/getUploadFileCount', fileController.getUploadFileCount);
 
 
 module.exports = router;

@@ -37,6 +37,18 @@ exports.insertUploadInfo = (value) => {
 };
 
 
+exports.getUploadFileCount = (userId) => {
+  
+  let _sql = `SELECT COUNT(*) as count FROM files WHERE uploader_id = '${userId}' AND status != 'deleted'`;
+  return query(_sql);
+}
+
+exports.getDeleteFileCount = (userId) => { 
+  let _sql = `SELECT COUNT(*) as count FROM files WHERE uploader_id = '${userId}' AND status = 'deleted'`;
+  return query(_sql);
+};
+
+
 // 删除文件接口 (更改文件状态为 'deleted')
 exports.deleteFile = (userId,filepath) => {
   console.log('value6699',filepath);
@@ -46,18 +58,142 @@ exports.deleteFile = (userId,filepath) => {
 
 
 // 查询当前用户上传的文件
-exports.getFileListByUserId = (userId, page) => {
-  let _sql = `SELECT * FROM files WHERE uploader_id = ${userId} AND status != 'deleted' order by upload_time DESC limit ${(page -
-    1) *
-    10},10;`;
-  return query(_sql);
+exports.getFileListByUserId = (userId, conditions = {}) => {
+
+   // 基础查询语句
+  let baseSql = `SELECT * FROM files WHERE uploader_id = ? AND status != 'deleted'`;
+  let params = [userId];
+  
+  // let _sql = `SELECT * FROM files WHERE uploader_id = ${userId} AND status != 'deleted' order by upload_time DESC limit ${(page -
+  //   1) *
+  //   10},10;`;
+  // return query(_sql);
+
+  // 添加文件名搜索条件
+  if (conditions.fileName) {
+    baseSql += ` AND original_name LIKE ?`;
+    params.push(`%${conditions.fileName}%`);
+  }
+  
+  // 添加文件类型搜索条件
+  if (conditions.fileType) {
+    // 如果是分类搜索（如 image, video 等）
+    if (['image', 'video', 'audio', 'document', 'archive'].includes(conditions.fileType)) {
+      switch (conditions.fileType) {
+        case 'image':
+          baseSql += ` AND mime_type LIKE 'image/%'`;
+          break;
+        case 'video':
+          baseSql += ` AND mime_type LIKE 'video/%'`;
+          break;
+        case 'audio':
+          baseSql += ` AND mime_type LIKE 'audio/%'`;
+          break;
+        case 'document':
+          baseSql += ` AND (mime_type LIKE 'application/%document%' 
+                          OR mime_type LIKE 'application/%officedocument%' 
+                          OR mime_type = 'application/pdf'
+                          OR mime_type = 'application/msword'
+                          OR mime_type = 'text/plain')`;
+          break;
+        case 'archive':
+          baseSql += ` AND (mime_type LIKE '%zip%' 
+                          OR mime_type LIKE '%rar%' 
+                          OR mime_type LIKE '%7z%' 
+                          OR mime_type LIKE '%tar%' 
+                          OR mime_type LIKE '%gz%')`;
+          break;
+      }
+    } else {
+      // 如果是具体的 MIME 类型
+      baseSql += ` AND mime_type = ?`;
+      params.push(conditions.fileType);
+    }
+  }
+  
+  // 添加上传时间范围搜索条件
+  if (conditions.startTime && conditions.endTime) {
+    baseSql += ` AND upload_time BETWEEN ? AND ?`;
+    params.push(conditions.startTime, conditions.endTime);
+  } else if (conditions.startTime) {
+    baseSql += ` AND upload_time >= ?`;
+    params.push(conditions.startTime);
+  } else if (conditions.endTime) {
+    baseSql += ` AND upload_time <= ?`;
+    params.push(conditions.endTime);
+  }
+  
+  // 添加排序和分页
+  baseSql += ` ORDER BY upload_time DESC LIMIT ?, ?`;
+  params.push((conditions.page - 1) * 10, 10);
+  
+  return query(baseSql, params);
 }
 
 // 查询用户上传的文件状态为 'active'的总数 
 
-exports.getFileActiveCountByUserId = (userId) => {
-  let _sql = `SELECT count(*) as count FROM files WHERE uploader_id = ${userId} AND status != 'deleted'`;
-  return query(_sql);
+exports.getFileActiveCountByUserId = (userId,conditions = {}) => {
+  // let _sql = `SELECT count(*) as count FROM files WHERE uploader_id = ${userId} AND status != 'deleted'`;
+  // return query(_sql);
+
+  let baseSql = `SELECT count(*) as count FROM files WHERE uploader_id = ? AND status != 'deleted'`;
+  let params = [userId];
+  
+  // 添加文件名搜索条件
+  if (conditions.fileName) {
+    baseSql += ` AND original_name LIKE ?`;
+    params.push(`%${conditions.fileName}%`);
+  }
+  
+  // 添加文件类型搜索条件
+  if (conditions.fileType) {
+    // 如果是分类搜索（如 image, video 等）
+    if (['image', 'video', 'audio', 'document', 'archive'].includes(conditions.fileType)) {
+      switch (conditions.fileType) {
+        case 'image':
+          baseSql += ` AND mime_type LIKE 'image/%'`;
+          break;
+        case 'video':
+          baseSql += ` AND mime_type LIKE 'video/%'`;
+          break;
+        case 'audio':
+          baseSql += ` AND mime_type LIKE 'audio/%'`;
+          break;
+        case 'document':
+          baseSql += ` AND (mime_type LIKE 'application/%document%' 
+                          OR mime_type LIKE 'application/%officedocument%' 
+                          OR mime_type = 'application/pdf'
+                          OR mime_type = 'application/msword'
+                          OR mime_type = 'text/plain')`;
+          break;
+        case 'archive':
+          baseSql += ` AND (mime_type LIKE '%zip%' 
+                          OR mime_type LIKE '%rar%' 
+                          OR mime_type LIKE '%7z%' 
+                          OR mime_type LIKE '%tar%' 
+                          OR mime_type LIKE '%gz%')`;
+          break;
+      }
+    } else {
+      // 如果是具体的 MIME 类型
+      baseSql += ` AND mime_type = ?`;
+      params.push(conditions.fileType);
+    }
+  }
+  
+  // 添加删除时间范围搜索条件
+  if (conditions.startTime && conditions.endTime) {
+    baseSql += ` AND delete_time BETWEEN ? AND ?`;
+    params.push(conditions.startTime, conditions.endTime);
+  } else if (conditions.startTime) {
+    baseSql += ` AND delete_time >= ?`;
+    params.push(conditions.startTime);
+  } else if (conditions.endTime) {
+    baseSql += ` AND delete_time <= ?`;
+    params.push(conditions.endTime);
+  }
+  
+  return query(baseSql, params);
 }
 
 
@@ -121,7 +257,6 @@ exports.getFileListPicTop5 = async (userId) => {
                 'image/heic', 
                 'image/heif'
               ) order by upload_time DESC limit 5`;
-    console.log('_sql888',_sql);
   return query(_sql);
 
 }
@@ -147,7 +282,6 @@ exports.getOtherFileListPicTop5 = async (userId) => {
               )
               ORDER BY upload_time DESC 
               LIMIT 5`;
-    console.log('_sql999',_sql);
     return query(_sql);
 }
 
@@ -157,4 +291,10 @@ exports.completeDeleteFile = async (userId,filepath) => {
   // console.log('彻底删除',filepath);
   // console.log(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
   return query(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
+}
+
+
+exports.queryFileType = async () => {
+  let _sql = `SELECT DISTINCT(mime_type) FROM files`;
+  return query(_sql);
 }

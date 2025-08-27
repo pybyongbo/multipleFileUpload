@@ -138,7 +138,28 @@ class RequestHttp {
   // GET请求
   get(url, params, _obj = {}) {
     let config = { ..._obj };
-    
+    // 检查是否需要使用 application/json 方式传参
+    // if (config.headers && config.headers['Content-Type'] === 'application/json' && params) {
+    //   // 使用 application/json 方式传参
+    //   return this.service.get(url, {
+    //     ...config,
+    //     data: params, // 将参数放在请求体中
+    //     headers: {
+    //       ...config.headers,
+    //       'Content-Type': 'application/json'
+    //     }
+    //   });
+    // } else {
+    //   // 传统的 URL 查询参数方式
+    //   if (params) {
+    //     // 处理URL参数
+    //     const queryString = formatParams(params);
+    //     const separator = url.includes('?') ? '&' : '?';
+    //     url = queryString ? `${url}${separator}${queryString}` : url;
+    //   }
+      
+    //   return this.service.get(url, config);
+    // }
     if (params) {
       // 处理URL参数
       const queryString = formatParams(params);
@@ -154,14 +175,7 @@ class RequestHttp {
     // 检查是否为文件上传请求
      // 检查是否为 ArrayBuffer 或 Blob 类型的二进制数据
     if (params instanceof ArrayBuffer || params instanceof Blob  ) {
-      console.log('12313123213----',url, params, _obj);
-      console.log({
-        headers: {
-          'Content-Type': 'application/octet-stream',
-          ...params.headers,
-        },
-        ..._obj,
-      });
+
       // 二进制数据上传
       return this.service.post(url, params, {
         headers: {

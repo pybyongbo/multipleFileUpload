@@ -93,9 +93,67 @@
 
       <el-col :span="18" :xs="24" class="content-col">
         <el-card class="file-box-card">
-          <template v-slot:header>
+          <template #header>
             <div class="clearfix hd-title">
               <span>文件管理中心</span>
+              <div class="searchForm">
+               <el-form ref="searchFormRef" :model="searchForm" :inline="true" label-width="80px">
+                  <el-form-item label="文件名">
+                    <el-input v-model="searchForm.fileName" placeholder="请输入文件名"></el-input>
+                  </el-form-item>
+                 <el-form-item label="文件类型">
+                    <el-select 
+                      v-model="searchForm.fileType" 
+                      placeholder="请选择文件类型" 
+                      style="width: 140px;"
+                      clearable
+                    >
+                      <!-- <template v-for="option in fileTypeOptions" :key="option.value">
+                        <el-option
+                          v-if="!option.children"
+                          :label="option.label"
+                          :value="option.value"
+                        >
+                        </el-option>
+                        
+                        <el-option-group
+                          v-else
+                          :label="option.label"
+                        >
+                          <el-option
+                            v-for="child in option.children"
+                            :key="child.value"
+                            :label="child.label"
+                            :value="child.value"
+                          >
+                          </el-option>
+                        </el-option-group>
+                      </template> -->
+                       <el-option
+                           v-for="option in fileTypeOptions"
+                            :key="option.value"
+                            :label="option.label"
+                            :value="option.value"
+                          >
+                          </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="上传时间">
+                    <el-date-picker
+                      v-model="searchForm.fileUploadTime"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      value-format="YYYY-MM-DD"
+                    ></el-date-picker>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="searchFile">搜索</el-button>
+                    <el-button @click="resetForm">重置</el-button>
+                  </el-form-item>
+                </el-form>
+              </div>
               <el-button type="primary" link @click="goToUploadPage"><svg-icon icon-class="upload" /> 继续上传文件</el-button>
             </div>
           </template>
@@ -104,7 +162,7 @@
             <el-button type="primary" size="small" @click="batchDownload"><el-icon><Download /></el-icon>批量下载文件</el-button>
           </div>
           <el-tabs v-model="selectedTab">
-            <el-tab-pane :label="`我上传的文件(${totalActiveCount})`" name="active">
+            <el-tab-pane :label="`我上传的文件(${fileStore.uploadCount})`" name="active">
               <el-table :data="fileListData" ref="multipleTableRef" row-key="id"  @selection-change="handleSelectionChange" border style="width: 100%">
                <!-- :selectable="selectable" -->
                 <template #empty>
@@ -147,8 +205,6 @@
                         :disabled="!shouldShowTooltip(scope.row.file_name)">
                         <span class="file-path-text">{{ scope.row.file_name }}</span>
                       </el-tooltip>
-                      <!-- <el-link underline="hover" icon="DocumentCopy" style="float:right"
-                        type="danger">&nbsp;复制</el-link> -->
                     </div>
                   </template>
                 </el-table-column>
@@ -162,7 +218,8 @@
                     <div class="file-link-type">
                   <el-tooltip :content="scope.row.mime_type" placement="top"
                         :disabled="!shouldShowTooltip(scope.row.mime_type)">
-                        <span class="file-path-text">{{ scope.row.mime_type }}</span>
+                        <!-- <span class="file-path-text">{{ scope.row.mime_type }}</span> -->
+                         <el-tag>{{ getCategoryLabel(getMimeTypeCategory(scope.row.mime_type)) }}</el-tag>
                       </el-tooltip>
                       </div>
                   </template>
@@ -199,7 +256,7 @@
               </div>
             </el-tab-pane>
 
-            <el-tab-pane :label="`已删除的文件(${totalDeletedCount})`" name="deleted">
+            <el-tab-pane :label="`已删除的文件(${fileStore.deleteCount})`" name="deleted">
               <el-table :data="fileListDeletedData" border style="width: 100%">
                 <template #empty>
                   <div class="empty-tips">
@@ -299,8 +356,10 @@
 </template>
 
 <script setup>
-import { ref,reactive, watch, toRefs,onMounted } from 'vue';
-import useUserStore from '@/store/modules/user'
+import { ref,reactive, watch, toRefs,onMounted,nextTick } from 'vue';
+import useUserStore from '@/store/modules/user';
+import useFileStore from '../store/modules/file';
+
 import { dayjs,ElMessage, ElMessageBox } from 'element-plus';
 import {WarningFilled} from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router';
@@ -309,9 +368,9 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 import Carousel from '@/components/Carousel';
-import Watermark from '@/components/WaterMark/index.vue';
-import { isImage,bytesToKB } from '@/utils/tools';
+import { isImage,bytesToKB,getMimeTypeCategory,formatDateRange } from '@/utils/tools';
 import { scrollTo } from '@/utils/scroll-to.js';
+import {mimeTypeMap} from '@/utils/constant.js';
 import { 
 
   getFileListByUserId, 
@@ -327,13 +386,28 @@ import {
 
 import {  updateUserEmail, getUserInfo } from "@/api/user";
 
-
-
 const router = useRouter();
 const userStore = useUserStore();
 
+const fileStore = useFileStore();
+
 const multipleTableRef = ref(null);
 const multipleSelection = ref([]);
+
+// 搜索表单数据
+const searchFormRef = ref(null);
+const searchForm = reactive({
+  fileName: "",
+  fileType: "",
+  fileUploadTime: "",
+});
+
+// 文件类型选项
+const fileTypeOptions = ref([
+  { label: '全部', value: '' }
+]);
+
+
 
 const selectedTab = ref("active");
 
@@ -431,6 +505,150 @@ const submitEmailForm = () => {
     }
   })
 }
+
+const searchFile = () => { 
+
+  console.log('搜索表单数据', searchForm);// 获取搜索表单数据
+
+  let searchParams = {
+    page: 1,
+    fileName: searchForm.fileName,
+    fileType: searchForm.fileType,
+    limit: 10
+  };
+  
+  // 处理日期范围参数
+  if (searchForm.fileUploadTime && Array.isArray(searchForm.fileUploadTime)) {
+    const dateParams = formatDateRange(searchForm.fileUploadTime);
+    searchParams = { ...searchParams, ...dateParams };
+  }
+   getFileList(searchParams);
+
+  // getFileList({
+  //   page: pageActive.value,
+  //   ...searchForm,
+  //   // ...processTimeParams(searchForm.fileUploadTime)
+  // });
+}
+
+const resetForm =async () => {
+   if (searchFormRef.value) {
+    searchFormRef.value.resetFields();
+  }
+  // 重置搜索条件数据（如果需要）
+  searchForm.fileName = "";
+  searchForm.fileType = "";
+  searchForm.fileUploadTime = "";
+
+  switch(selectedTab.value) {
+
+    case 'active':
+      getFileList({
+        page: 1,
+        ...searchForm
+      });
+      break;
+      case 'deleted':
+      getFileListDeleted({
+        page: pageDeleted.value
+      });
+      break;
+      default:
+        break;
+  }
+
+}
+
+// 获取 MIME 类型的友好显示名称
+const getFriendlyMimeType = (mimeType) => {
+  if (!mimeType) return '未知类型'
+  return mimeTypeMap[mimeType] || mimeType
+}
+
+
+
+// 获取分类标签
+const getCategoryLabel = (category) => {
+  const labels = {
+    'image': '图片',
+    'video': '视频',
+    'audio': '音频',
+    'document': '文档',
+    'archive': '压缩包',
+    'other': '其他'
+  }
+  return labels[category] || '其他'
+}
+
+
+// 处理文件类型数据
+const processFileTypeData = (data) => {
+  // 初始化选项数组
+  const options = [{ label: '全部', value: '' }]
+  
+  // 分类存储不同类型的 MIME
+  const categories = {
+    image: [],
+    video: [],
+    audio: [],
+    document: [],
+    archive: [],
+    other: []
+  }
+  
+  // 将 MIME 类型按分类存储
+  data.forEach(item => {
+    const category = getMimeTypeCategory(item.mime_type)
+    if (!categories[category].some(m => m.mime_type === item.mime_type)) {
+      categories[category].push(item)
+    }
+  })
+  
+  // 为每个分类添加选项
+  Object.keys(categories).forEach(category => {
+    if (categories[category].length > 0) {
+      options.push({ 
+        label: getCategoryLabel(category), 
+        value: category,
+        children: categories[category].map(item => ({
+          label: getFriendlyMimeType(item.mime_type),
+          value: item.mime_type
+        }))
+      })
+    }
+  })
+  
+  fileTypeOptions.value = options
+}
+
+
+const getFileTypeData = async () => {
+  try {
+    await fileStore.getFileTypeList()
+    if (fileStore.mimetype && fileStore.mimetype.length > 0) {
+      processFileTypeData(fileStore.mimetype); // 处理文件类型数据
+    }
+  } catch (error) {
+    console.error('获取文件类型数据失败:', error)
+    ElMessage.error('获取文件类型数据失败')
+  }
+}
+
+
+const getTotalCount = async () => {
+  await fileStore.getTotalCount()
+}
+
+// const handleCarouselChange = (index) => {
+//   currentIndex.value = index;
+// };
+
+// const handleCarouselClick = (item) => {
+//   // 处理点击事件
+//   console.log('点击了轮播图项:', item);
+// }
+
+
 const handleSelectionChange = (val) => {
   const fileListInfo = val.map(item => {
     return {
@@ -468,9 +686,9 @@ function copyTextSuccess(filePath) {
   },3000)
 }
 
-const getFileList = async (page) => {
+const getFileList = async (params) => {
   try {
-    const res = await getFileListByUserId(page);
+    const res = await getFileListByUserId(params);
     fileListData.value = res.data;
     totalActiveCount.value = res.total;
   } catch (error) {
@@ -504,7 +722,10 @@ const upDataDeletedCurPage = (page) => {
 // 移除原来的 watch，使用更简单的方式
 const handleTabChange = () => {
   if (selectedTab.value === 'active') {
-    getFileList(pageActive.value);
+    getFileList({
+      page: pageActive.value,
+      ...searchForm
+    });
   } else if (selectedTab.value === 'deleted') {
     getFileListDeleted(pageDeleted.value);
   }
@@ -516,7 +737,12 @@ const goToUploadPage = () => {
 
 // 初始化加载
 onMounted(() => {
-  getFileList(1);
+  getFileTypeData();
+  getTotalCount();
+  getFileList({
+    page: pageActive.value,
+    ...searchForm,
+  });
   getFileListDeleted(1);
   getCarouselTop5();
   getOtherFileList();
@@ -524,7 +750,10 @@ onMounted(() => {
 
 // 监听分页变化
 watch(pageActive, (newPage) => {
-  getFileList(newPage);
+  getFileList({
+    page: newPage,
+    ...searchForm,
+  });
 });
 
 watch(pageDeleted, (newPage) => {
@@ -547,7 +776,10 @@ const batchDelete = () => {
       const {code,message} = res;
       if(code === 200) {
         ElMessage.success('删除成功');
-        getFileList(pageActive.value);
+        getFileList({
+           page: pageActive.value,
+      ...searchForm
+        });
       } else {
         ElMessage.error(message);
       }
@@ -560,7 +792,6 @@ const batchDelete = () => {
 
 // 操作项 删除单个文件
 const deleteSingleFile =async (item,index) =>{
-  console.log('item',item);
   try {
     ElMessageBox.confirm('确定要删除选中的文件吗？(将文件放入回收站,可还原)', '提示', {
     confirmButtonText: '确定',
@@ -570,7 +801,11 @@ const deleteSingleFile =async (item,index) =>{
     deleteUploadFile({ filename: item.file_path }).then((res)=>{
     if (res.success) {
           ElMessage.success('删除成功');
-          getFileList(pageActive.value);
+          getFileList({
+             page: pageActive.value,
+            ...searchForm
+          });
+            getTotalCount();
           getCarouselTop5();
           getFileListDeleted(1);
         } else {
@@ -646,6 +881,7 @@ const restoreFile = async (item) => {
       try {
         const activeRes = await getFileListByUserId(1);
         totalActiveCount.value = activeRes.total;
+        getTotalCount();
       } catch (error) {
         console.error('更新活动文件总数失败:', error);
       }
@@ -720,7 +956,7 @@ const completeDelete = async (item) => {
     if (res.success) {
           ElMessage.success('彻底删除成功');
           getFileListDeleted(pageDeleted.value);
-
+          getTotalCount();
         } else {
           throw new Error(res.message)
         }
@@ -730,15 +966,7 @@ const completeDelete = async (item) => {
     ElMessage.error('删除失败')
   }
 
-  // try {
-  //   const res = await deleteFileById(fileId);
-  //   if (res.code === 200) {
-  //     ElMessage.success('彻底删除成功');
-  //     getFileList();
-  //   }
-  // } catch (error) {
-  //   console.error('彻底删除失败:', error);
-  // }
+
 };
 
 
@@ -800,7 +1028,6 @@ const completeDelete = async (item) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  //height: calc(100% - 20px);
   
   :deep(.el-card__body) {
     flex: 1;
@@ -884,9 +1111,14 @@ const completeDelete = async (item) => {
   }
 }
 
+.searchForm{
+   :deep(.el-form-item) {
+    margin-bottom: 0;
+   }
+}
+
 .file-box-card {
   margin-top: 20px;
-
   position: relative;
 }
 

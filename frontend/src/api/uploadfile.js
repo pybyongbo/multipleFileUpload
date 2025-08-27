@@ -1,5 +1,12 @@
 import http,{ service } from '@/utils/request'
 import axios from 'axios'
+
+// 获取上传/删除文件总数
+export const getFileTotalCount = () => {
+  return http.get("/getUploadFileCount");
+}
+
+
 // 上传文件
 export const uploadFile = params => {
   return http.post("/upload", params);
@@ -11,9 +18,14 @@ export const deleteUploadFile = params => {
   return http.post("/delete", params);
 };
 
-// 获取当前用户上传的文件列表
-export const getFileListByUserId = (page) => {
-  return http.get(`/fileList?page=${page}`);
+// 获取当前用户上传的文件列表 
+// export const getFileListByUserId = (page) => {
+//   return http.get(`/fileList?page=${page}`);
+// };
+
+export const getFileListByUserId = (params) => {
+  console.log('params',params);
+  return http.post('/fileList',  params );
 };
 
 
@@ -25,7 +37,6 @@ export const getFileListDeletedByUserId = (page) => {
 // 删除文件 (列表页面,单个,多个)
 
 export const batchDeleteFile = ({fileList}) => {
-  // console.log('fileList',fileList);
   return http.post("/batchDeleteFile", {fileList});
 };
 
@@ -118,4 +129,11 @@ export function mergeSlice(data, config = {}) {
 
 export const clearDir = () => {
   return http.post('/clearDir')
+}
+
+
+// 获取文件类型下拉列表
+
+export const getFileTypeList = () => {
+  return http.get('/getFileType')
 }

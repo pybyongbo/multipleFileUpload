@@ -77,3 +77,80 @@ export function bytesToKB(bytes, decimals = 2) {
   
   return kbValue.toFixed(dm) + ' KB';
 }
+
+
+ // 获取 MIME 类型分类
+export const getMimeTypeCategory = (mimeType) => {
+  if (!mimeType) return 'other'
+  
+  if (mimeType.startsWith('image/')) return 'image'
+  if (mimeType.startsWith('video/')) return 'video'
+  if (mimeType.startsWith('audio/')) return 'audio'
+  if (mimeType.startsWith('text/') || 
+      mimeType.includes('document') || 
+      mimeType.includes('pdf') || 
+      mimeType.includes('msword') ||
+      mimeType.includes('officedocument')) return 'document'
+  if (mimeType.includes('zip') || 
+      mimeType.includes('rar') || 
+      mimeType.includes('7z') || 
+      mimeType.includes('tar') || 
+      mimeType.includes('gz')) return 'archive'
+  
+  return 'other'
+}
+
+
+export const getCategoryLabel = (category) => {
+  const labels = {
+    'image': '图片',
+    'video': '视频',
+    'audio': '音频',
+    'document': '文档',
+    'archive': '压缩包',
+    'other': '其他'
+  }
+  return labels[category] || '其他'
+}
+
+
+// 在 utils/tools.js 中添加时间处理函数
+// 在 utils/tools.js 中修改时间处理函数
+export const formatDateRange = (dateRange) => {
+  if (!dateRange || !Array.isArray(dateRange) || dateRange.length === 0) {
+    return {};
+  }
+  
+  const result = {};
+  
+  // 处理开始时间
+  if (dateRange[0]) {
+    const startDate = new Date(dateRange[0]);
+    // 设置为当天的开始时间 00:00:00
+    startDate.setHours(0, 0, 0, 0);
+    // 使用本地时区格式化
+    const dateStr = startDate.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '-');
+    result.startTime = `${dateStr} 00:00:00`;
+  }
+  
+  // 处理结束时间
+  if (dateRange[1]) {
+    const endDate = new Date(dateRange[1]);
+    // 设置为当天的结束时间 23:59:59
+    endDate.setHours(23, 59, 59, 999);
+    // 使用本地时区格式化
+    const dateStr = endDate.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '-');
+    result.endTime = `${dateStr} 23:59:59`;
+  }
+  
+  return result;
+};
+

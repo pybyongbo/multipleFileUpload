@@ -52,7 +52,6 @@
 <script setup>
 import {ref,watch,onMounted, getCurrentInstance } from 'vue'
 import { useRoute,useRouter } from 'vue-router';
-// import { userLogin } from "@/api/user"
 import useUserStore from '@/store/modules/user'
 const title = import.meta.env.VITE_APP_TITLE+' 登录'
 const route = useRoute()

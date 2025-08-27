@@ -17,6 +17,8 @@ let query = (sql, values) => {
       } else {
         connection.query(sql, values, (err, rows) => {
 
+          // console.log(123123,sql);
+
           if (err) {
             reject(err);
           } else {
