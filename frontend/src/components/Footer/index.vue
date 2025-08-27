@@ -3,24 +3,21 @@
     <div class="footer-content">
       <div class="footer-top">
         <div class="footer-info">
-         
           <p class="support">
-            用心打造每一个功能，为用户提供最佳体验 
-            技术支持 <el-divider direction="vertical" />
-             <a href="https://901web.com" target="_blank" class="link">
-              <i class="el-icon-link"></i>
-              901web前端博客
-            </a>
+             文件上传/接口下载/分片上传/压缩下载应用一站式扫盲
+           <span>@ {{currentYear}}-{{currentMonth}}</span>
           </p>
-
         </div>
-       
       </div>
       <div class="footer-bottom">
         <div class="divider"></div>
         <p class="footer-note">
-           文件上传/接口下载/分片上传/压缩下载应用一站式扫盲
-           <span>@ {{currentYear}}-{{currentMonth}}</span>
+           用心打造每一个功能，为用户提供最佳体验 
+             <el-divider direction="vertical" />
+             技术支持:<a href="https://901web.com" target="_blank" class="link">
+              <i class="el-icon-link"></i>
+              901web前端博客
+            </a>
         </p>
       </div>
     </div>
@@ -102,24 +99,6 @@ onMounted(() => {
     margin: 0;
     color: #bdc3c7;
     overflow: hidden;
-    .link {
-      color: #3498db;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      float:right;
-      &:hover {
-        color: #5dade2;
-        text-decoration: underline;
-      }
-      
-      i {
-        font-size: 12px;
-      }
-    }
   }
 }
 
@@ -162,8 +141,23 @@ onMounted(() => {
     justify-content: center;
     gap: 8px;
     
-    i {
+   .link {
       color: #3498db;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      float:right;
+      &:hover {
+        color: #5dade2;
+        text-decoration: underline;
+      }
+      
+      i {
+        font-size: 12px;
+      }
     }
   }
 }
