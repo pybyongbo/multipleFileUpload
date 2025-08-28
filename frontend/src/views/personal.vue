@@ -603,7 +603,7 @@ const getFileTypeData = async () => {
     }
   } catch (error) {
     console.error('获取文件类型数据失败:', error)
-    ElMessage.error('获取文件类型数据失败')
+    // ElMessage.error('获取文件类型数据失败')
   }
 }
 
@@ -1094,7 +1094,7 @@ const completeDelete = async (item) => {
     align-items: center;
     flex-wrap: nowrap;
     justify-content: center;
-    padding-top:8px;
+
   }
    :deep(.el-form-item) {
     margin-bottom: 10px;
@@ -1126,7 +1126,10 @@ const completeDelete = async (item) => {
   .el-button {
     margin-right: 20px;
     margin-left:20px;
-    flex-shrink: 0
+    flex-shrink: 0;
+    &.is-link{
+      margin-top:-10px;
+    }
   }
  
 }
@@ -1250,7 +1253,11 @@ const completeDelete = async (item) => {
       font-size:50px;
     }
 }
-
+.hd-title{
+    span.manage-center{
+      margin-top:-8px;
+    }
+  }
 
  @media screen and (max-width: 1500px) {
   .hd-title{
