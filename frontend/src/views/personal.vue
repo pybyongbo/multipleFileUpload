@@ -707,7 +707,22 @@ const getFileListDeleted = async (page) => {
 
 const upDataCurPage = (page) => {
   pageActive.value = page;
-  scrollTo(0, 800)
+  // scrollTo(0, 800);
+  nextTick(() => {
+    const container = document.querySelector('.app-container');
+    if (container) {
+      container.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } else {
+      // 备用方案：滚动整个窗口
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  });
 }
 
 const upDataDeletedCurPage = (page) => {
