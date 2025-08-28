@@ -486,7 +486,6 @@ const submitEmailForm = () => {
             type: 'success',
           });
           userStore.getInfo().then(res => {
-            console.log('6655', res);
 
           }).catch(() => {
           })
@@ -509,8 +508,6 @@ const submitEmailForm = () => {
 }
 
 const searchFile = () => { 
-
-  console.log('搜索表单数据', searchForm);// 获取搜索表单数据
 
   let searchParams = {
     page: 1,

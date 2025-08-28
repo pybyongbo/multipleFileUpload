@@ -451,11 +451,6 @@ exports.getFileListDeletedByUserId = async (ctx) => {
 
 exports.batchDeleteFile = async (ctx) => {
   const { fileList } = ctx.request.body;
-  console.log('fileList', fileList);
-  console.log(
-    'ids',
-    fileList.map((item) => item.id)
-  );
   const ids = fileList.map((item) => item.id);
   if (!ids || !Array.isArray(ids) || ids.length === 0) {
     return (ctx.body = { success: false, msg: '请选择要删除的文件' });

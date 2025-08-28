@@ -84,7 +84,6 @@ const previewIndex = ref(0) // 要预览的图片索引
 
 
 const cpreviewsList = computed(() => {
-  console.log('previews.value',previews.value);
   return {
     pictureList: previews.value?.filter(item => item?.mimeType.startsWith('image/')).map(item => item),
     otherList: previews.value?.filter(item => !item?.mimeType.startsWith('image/')).map(item => item)
@@ -93,8 +92,6 @@ const cpreviewsList = computed(() => {
 // 上传拦截：自定义上传逻辑
 const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => {
 
-
-  console.log('file', file);
   fullscreenLoading.value = true;
    // 将文件添加到正在上传列表
   uploadingFiles.value.push(file.uid);
