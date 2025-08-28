@@ -154,7 +154,7 @@
                 <el-table-column type="selection"  width="55" fixed="left"/>
                 <el-table-column prop="id" label="Id" width="60" align="center" fixed="left"/>
 
-                <el-table-column prop="full_path" label="缩略图" align="center" fixed="left">
+                <el-table-column prop="full_path" label="缩略图" width="150" align="center" fixed="left">
                   <template #default="scope">
                     <div v-if="isImage(scope.row.file_name)" class="thumbnail-container">
                       <img :src="scope.row.full_path" :alt="scope.row.originalName" class="thumbnail-img" />
@@ -178,9 +178,9 @@
                   </template>
                 </el-table-column> -->
 
-                <el-table-column label="文件名称" align="center" width="300">
+                <el-table-column label="文件名称" align="center" >
                   <template #default="scope">
-                    <div class="file-link">
+                    <div class="file-link11">
                       <el-tooltip :content="scope.row.file_name" placement="top"
                         :disabled="!shouldShowTooltip(scope.row.file_name)">
                         <span class="file-path-text">{{ scope.row.file_name }}</span>
@@ -263,7 +263,7 @@
                   </div>
                 </template>
                 <el-table-column prop="id" label="Id" width="60" align="center" fixed="left"/>
-                <el-table-column prop="full_path" label="缩略图" align="center" fixed="left">
+                <el-table-column prop="full_path" label="缩略图" width="150" align="center" fixed="left">
                   <template #default="scope">
                     <div v-if="isImage(scope.row.file_name)" class="thumbnail-container">
                       <img :src="scope.row.full_path" :alt="scope.row.originalName" class="thumbnail-img" />
@@ -273,9 +273,9 @@
                     </div>
                   </template>
                 </el-table-column>
-                <el-table-column  label="文件全地址" align="center" width="320">
+                <el-table-column  label="文件全地址" align="center" >
                    <template #default="scope">
-                    <div class="file-link-full-path">
+                    <div class="file-link-full-path11">
                       <el-tooltip :content="scope.row.full_path" placement="top"
                         :disabled="!shouldShowTooltip(scope.row.full_path)">
                         <span class="file-path-text">{{ scope.row.full_path }}</span>
