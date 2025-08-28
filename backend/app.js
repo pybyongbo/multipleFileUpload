@@ -5,6 +5,21 @@ const json = require('koa-json')
 const path = require('path');
 const onerror = require('koa-onerror')
 const logger = require('koa-logger')
+
+// 添加静态文件CORS处理中间件
+app.use(async (ctx, next) => {
+  // 如果是/uploads/路径下的请求，添加CORS头部
+  if (ctx.path.startsWith('/uploads/')) {
+    ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin );
+    ctx.set('Access-Control-Allow-Credentials', 'true');
+    // 如果是OPTIONS预检请求，直接返回
+    if (ctx.method === 'OPTIONS') {
+      ctx.status = 204;
+      return;
+    }
+  }
+  await next();
+});
 app.use(require('koa-static')(__dirname + '/public'))
 // 添加 koa-body,使用解构赋值的方式导入 koaBody
 
@@ -28,6 +43,7 @@ onerror(app)
 // app.use(cors())
 app.use(
   cors({
+    
     exposeHeaders: ['WWW-Authenticate', 'Content-Type', 'Server-Authorization'],
     maxAge: 3600,
     credentials: true,

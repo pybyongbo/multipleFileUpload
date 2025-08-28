@@ -73,8 +73,9 @@
             <div>
               <ol class="other-file-list" v-if="otherFileListData.length">
                 <li v-for="(file, index) in otherFileListData" :key="index" class="list-item">
+                   <span class="num">{{index+1}}</span>
                   <el-tooltip :content="file.file_name" placement="top" :disabled="!shouldShowTooltip(file.file_name)">
-                    {{file.file_name}}
+                   {{file.file_name}}
                     </el-tooltip>
                 </li>
               </ol>
@@ -195,10 +196,29 @@
                 <el-table-column prop="mime_type" label="文件类型" width="180" align="center">
                   <template #default="scope">
                     <div class="file-link-type">
-                  <el-tooltip :content="scope.row.mime_type" placement="top"
+                      <!-- <el-tooltip :content="scope.row.mime_type" placement="top"
                         :disabled="!shouldShowTooltip(scope.row.mime_type)">
                          <el-tag>{{ getCategoryLabel(getMimeTypeCategory(scope.row.mime_type)) }}</el-tag>
-                      </el-tooltip>
+                      </el-tooltip> -->
+                        <!-- {{ getFileExtension(scope.row.file_name).substring(1) }} -->
+                      <span v-if="getCategoryLabel(getMimeTypeCategory(scope.row.mime_type))=='图片'">
+                        <svg-icon icon-class="image" class="el-input__icon input-icon" />
+                      </span>
+                    
+                      <span v-else-if="getFileExtension(scope.row.file_name).substring(1)=='pdf'">
+                        <svg-icon icon-class="pdf" class="el-input__icon input-icon" />
+                      </span>
+
+                      <span v-else-if="getFileExtension(scope.row.file_name).substring(1)=='pptx'">
+                        <svg-icon icon-class="ppt" class="el-input__icon input-icon" />
+                      </span>
+                      <span v-else-if="getCategoryLabel(getMimeTypeCategory(scope.row.mime_type))=='视频'">
+                        <svg-icon icon-class="video" class="el-input__icon input-icon" />
+                      </span>
+
+                      <span v-else>
+                        <svg-icon icon-class="file" class="el-input__icon input-icon" />
+                      </span>
                       </div>
                   </template>
                 </el-table-column>
@@ -270,7 +290,11 @@
                       {{ bytesToKB(+scope?.row.file_size) }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="mime_type" label="文件类型" width="180" align="center" />
+                <el-table-column prop="mime_type" label="文件类型" width="180" align="center">
+                  <template #default="scope">
+                  <el-tag>{{ getCategoryLabel(getMimeTypeCategory(scope.row.mime_type)) }}</el-tag>
+                  </template>
+                </el-table-column>
                 <el-table-column prop="delete_time" label="删除时间" width="180" align="center">
                   <template #default="scope">
                     {{ scope.row.delete_time?dayjs(scope.row.delete_time).format('YYYY-MM-DD HH:mm:ss'):'--' }}
@@ -346,7 +370,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 import Carousel from '@/components/Carousel';
-import { isImage,bytesToKB,getMimeTypeCategory,formatDateRange } from '@/utils/tools';
+import { isImage,bytesToKB,getMimeTypeCategory,formatDateRange,getFileExtension } from '@/utils/tools';
 import { scrollTo } from '@/utils/scroll-to.js';
 import {mimeTypeMap} from '@/utils/constant.js';
 import { 
@@ -500,7 +524,8 @@ const searchFile = () => {
     const dateParams = formatDateRange(searchForm.fileUploadTime);
     searchParams = { ...searchParams, ...dateParams };
   }
-   getFileList(searchParams);
+  pageActive.value = 1;
+  getFileList(searchParams);
 
 }
 
@@ -1026,6 +1051,19 @@ const completeDelete = async (item) => {
     border-bottom:1px solid #eee;
     font-size:12px;
     margin-bottom:5px;
+    position: relative;
+    span.num{
+      color:rbga(0,0,0,0.5);
+      font-weight: bold;
+      height: 20px;
+      line-height: 20px;
+      width:20px;
+      text-align: center;
+      display: inline-block;
+      margin-right:10px;
+      background: url(data:image/png;base64,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) no-repeat;
+      background-size: cover;
+    }
   }
 }
 

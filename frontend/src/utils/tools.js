@@ -62,6 +62,12 @@ export const isImage = (fileName) => {
 }
 
 
+// 获取文件的后缀名
+export const getFileExtension = (fileName) => {
+  return fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+}
+
+
 
 /**
  * 将字节转换为KB
