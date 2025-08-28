@@ -1234,14 +1234,7 @@ const completeDelete = async (item) => {
   }
 }
 
-.file-link {
-  width: 300px;
-  padding-right:20px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  box-sizing: border-box;
-}
+
 
 .file-link-type{
 
