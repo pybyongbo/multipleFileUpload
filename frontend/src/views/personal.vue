@@ -91,11 +91,11 @@
       </div>
       </el-col>
 
-      <el-col :span="18" :xs="24" class="content-col">
+      <el-col :span="18" :xs="24" class="content-col" style="padding-left:0;padding-right:20px;">
         <el-card class="file-box-card">
           <template #header>
             <div class="clearfix hd-title">
-              <span>文件管理中心</span>
+              <span class="manage-center">管理中心</span>
               <div class="searchForm">
                <el-form ref="searchFormRef" :model="searchForm" :inline="true" label-width="80px">
                   <el-form-item label="文件名">
@@ -108,27 +108,6 @@
                       style="width: 140px;"
                       clearable
                     >
-                      <!-- <template v-for="option in fileTypeOptions" :key="option.value">
-                        <el-option
-                          v-if="!option.children"
-                          :label="option.label"
-                          :value="option.value"
-                        >
-                        </el-option>
-                        
-                        <el-option-group
-                          v-else
-                          :label="option.label"
-                        >
-                          <el-option
-                            v-for="child in option.children"
-                            :key="child.value"
-                            :label="child.label"
-                            :value="child.value"
-                          >
-                          </el-option>
-                        </el-option-group>
-                      </template> -->
                        <el-option
                            v-for="option in fileTypeOptions"
                             :key="option.value"
@@ -150,7 +129,7 @@
                   </el-form-item>
                   <el-form-item>
                     <el-button type="primary" @click="searchFile">搜索</el-button>
-                    <el-button @click="resetForm">重置</el-button>
+                    <el-button @click="resetForm" style="margin:0;">重置</el-button>
                   </el-form-item>
                 </el-form>
               </div>
@@ -218,7 +197,6 @@
                     <div class="file-link-type">
                   <el-tooltip :content="scope.row.mime_type" placement="top"
                         :disabled="!shouldShowTooltip(scope.row.mime_type)">
-                        <!-- <span class="file-path-text">{{ scope.row.mime_type }}</span> -->
                          <el-tag>{{ getCategoryLabel(getMimeTypeCategory(scope.row.mime_type)) }}</el-tag>
                       </el-tooltip>
                       </div>
@@ -524,11 +502,6 @@ const searchFile = () => {
   }
    getFileList(searchParams);
 
-  // getFileList({
-  //   page: pageActive.value,
-  //   ...searchForm,
-  //   // ...processTimeParams(searchForm.fileUploadTime)
-  // });
 }
 
 const resetForm =async () => {
@@ -974,10 +947,8 @@ const completeDelete = async (item) => {
 
 <style lang="scss" scoped>
 .app-container {
-  //padding-right: 20px;
   height: calc(100vh - 80px);
   padding-top: 0px;
-  //min-height: calc(100vh - 60px); /* 减去导航栏高度 */
   box-sizing: border-box;
   overflow-y: scroll;
   overflow-x: hidden;
@@ -1010,7 +981,7 @@ const completeDelete = async (item) => {
 
 .box-card {
   margin-top: 20px;
-  margin-left: 30px;
+  margin-left: 10px;
   flex: 1;
 }
 
@@ -1024,13 +995,13 @@ const completeDelete = async (item) => {
 }
 
 .file-box-card {
-  margin-top: 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
 
   :deep(.el-card__header) {
     padding-right: 0;
+    padding-bottom:0!important;
   }
   
   :deep(.el-card__body) {
@@ -1116,9 +1087,19 @@ const completeDelete = async (item) => {
 }
 
 .searchForm{
+  flex: 1; // 占据剩余空间
+  margin: 0 15px; // 添加一些间距
+  :deep(.el-form){
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    justify-content: center;
+    padding-top:8px;
+  }
    :deep(.el-form-item) {
-    margin-bottom: 0;
+    margin-bottom: 10px;
     margin-right:5px;
+    flex-shrink: 0
    }
 }
 
@@ -1140,11 +1121,18 @@ const completeDelete = async (item) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
+  flex-wrap: nowrap;
+  min-width: 0; // 防止内容溢出
   .el-button {
-    margin-right: 0px;
+    margin-right: 20px;
+    margin-left:20px;
+    flex-shrink: 0
   }
+ 
 }
+
+
+
 
 // 缩略图容器样式
 .thumbnail-container {
@@ -1262,6 +1250,16 @@ const completeDelete = async (item) => {
       font-size:50px;
     }
 }
+
+
+ @media screen and (max-width: 1500px) {
+  .hd-title{
+    span.manage-center{
+      display: none;
+
+    }
+  }
+ }
 
 </style>
 

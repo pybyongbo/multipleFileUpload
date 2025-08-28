@@ -1,4 +1,26 @@
 <template>
+
+  <!-- <template v-for="option in fileTypeOptions" :key="option.value">
+                        <el-option
+                          v-if="!option.children"
+                          :label="option.label"
+                          :value="option.value"
+                        >
+                        </el-option>
+                        
+                        <el-option-group
+                          v-else
+                          :label="option.label"
+                        >
+                          <el-option
+                            v-for="child in option.children"
+                            :key="child.value"
+                            :label="child.label"
+                            :value="child.value"
+                          >
+                          </el-option>
+                        </el-option-group>
+                      </template> -->
   <el-upload
     class="upload-demo"
     drag
