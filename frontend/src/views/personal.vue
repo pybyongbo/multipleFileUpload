@@ -118,9 +118,20 @@
                           </el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="上传时间">
+                  <el-form-item label="上传时间" v-if="selectedTab === 'active'">
                     <el-date-picker
                       v-model="searchForm.fileUploadTime"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      value-format="YYYY-MM-DD"
+                    ></el-date-picker>
+                  </el-form-item>
+
+                  <el-form-item label="删除时间" v-else>
+                    <el-date-picker
+                      v-model="searchForm.fileDeleteTime"
                       type="daterange"
                       range-separator="至"
                       start-placeholder="开始日期"
@@ -148,7 +159,7 @@
                 <template #empty>
                   <div class="empty-tips">
                     <svg-icon icon-class="empty"  class="empty-icon" />
-                    <span class="empty-text">暂无文件,请先去上传文件</span>
+                    <span class="empty-text">暂无数据</span>
                   </div>
                 </template>
                 <el-table-column type="selection"  width="55" fixed="left"/>
@@ -536,17 +547,18 @@ const resetForm =async () => {
   searchForm.fileUploadTime = "";
 
   switch(selectedTab.value) {
-
     case 'active':
       getFileList({
         page: 1,
         ...searchForm
       });
+      pageActive.value = 1;
       break;
       case 'deleted':
       getFileListDeleted({
         page: pageDeleted.value
       });
+      pageDeleted.value = 1;
       break;
       default:
         break;
@@ -681,9 +693,25 @@ function copyTextSuccess(filePath) {
   },3000)
 }
 
-const getFileList = async (params) => {
+const getFileList = async () => {
+
+ let searchParams = {
+    page: pageActive.value,
+    fileName: searchForm.fileName,
+    fileType: searchForm.fileType,
+    limit: 10
+  };
+
+   // 处理日期范围参数
+  if (searchForm.fileUploadTime && Array.isArray(searchForm.fileUploadTime)) {
+    const dateParams = formatDateRange(searchForm.fileUploadTime);
+    searchParams = { ...searchParams, ...dateParams };
+  } else {
+    searchParams = { ...searchParams,startTime:'',endTime:''  };
+  }
+
   try {
-    const res = await getFileListByUserId(params);
+    const res = await getFileListByUserId(searchParams);
     fileListData.value = res.data;
     totalActiveCount.value = res.total;
   } catch (error) {
@@ -727,15 +755,27 @@ const upDataCurPage = (page) => {
 
 const upDataDeletedCurPage = (page) => {
   pageDeleted.value = page;
+   nextTick(() => {
+    const container = document.querySelector('.app-container');
+    if (container) {
+      container.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } else {
+      // 备用方案：滚动整个窗口
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  });
 }
 
 // 移除原来的 watch，使用更简单的方式
 const handleTabChange = () => {
   if (selectedTab.value === 'active') {
-    getFileList({
-      page: pageActive.value,
-      ...searchForm
-    });
+    getFileList();
   } else if (selectedTab.value === 'deleted') {
     getFileListDeleted(pageDeleted.value);
   }
@@ -749,21 +789,15 @@ const goToUploadPage = () => {
 onMounted(() => {
   getFileTypeData();
   getTotalCount();
-  getFileList({
-    page: pageActive.value,
-    ...searchForm,
-  });
-  getFileListDeleted(1);
+  getFileList();
   getCarouselTop5();
   getOtherFileList();
 });
 
 // 监听分页变化
 watch(pageActive, (newPage) => {
-  getFileList({
-    page: newPage,
-    ...searchForm,
-  });
+  pageActive.value = newPage;
+  getFileList();
 });
 
 watch(pageDeleted, (newPage) => {
@@ -788,8 +822,10 @@ const batchDelete = () => {
         ElMessage.success('删除成功');
         getFileList({
            page: pageActive.value,
-      ...searchForm
+          ...searchForm
         });
+        getCarouselTop5();
+        getOtherFileList();
       } else {
         ElMessage.error(message);
       }

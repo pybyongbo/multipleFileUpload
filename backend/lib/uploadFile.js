@@ -183,16 +183,16 @@ exports.getFileActiveCountByUserId = (userId,conditions = {}) => {
   
   // 添加删除时间范围搜索条件
   if (conditions.startTime && conditions.endTime) {
-    baseSql += ` AND delete_time BETWEEN ? AND ?`;
+    baseSql += ` AND upload_time BETWEEN ? AND ?`;
     params.push(conditions.startTime, conditions.endTime);
   } else if (conditions.startTime) {
-    baseSql += ` AND delete_time >= ?`;
+    baseSql += ` AND upload_time >= ?`;
     params.push(conditions.startTime);
   } else if (conditions.endTime) {
-    baseSql += ` AND delete_time <= ?`;
+    baseSql += ` AND upload_time <= ?`;
     params.push(conditions.endTime);
   }
-  
+  console.log('baseSql',baseSql);
   return query(baseSql, params);
 }
 

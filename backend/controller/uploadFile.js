@@ -2,7 +2,6 @@
 const path = require('path');
 const sharp = require('sharp');
 const fs = require('fs');
-// const { writeFileSync } = require('fs');
 const fileModel = require('../lib/uploadFile.js');
 
 const uploadDir = path.join(__dirname, '../public/uploads');
@@ -13,11 +12,11 @@ const uploadDir = path.join(__dirname, '../public/uploads');
  * @param data 返回数据
  * @return
  */
-var resObj = (code, msg, data) => {
+var resObj = (code,data,msg,) => {
   return {
-    status: code,
-    msg: msg,
+    code: code,
     data: data,
+    msg: msg,
   };
 };
 
@@ -249,10 +248,11 @@ exports.uploadFile = async (ctx) => {
     // 如果没有获取到文件，返回错误信息
     if (!file) {
       ctx.status = 400; // Bad Request
-      ctx.body = {
-        code: 1,
-        message: '请上传文件！',
-      };
+      ctx.body = resObj(400, {}, '请上传文件！');
+      // ctx.body = {
+      //   code: 1,
+      //   message: '请上传文件！',
+      // };
       return;
     }
 
@@ -298,21 +298,24 @@ exports.uploadFile = async (ctx) => {
 
     // --- 5. 向客户端返回成功响应 ---
 
-    ctx.body = {
-      success: true,
-      code: 200,
-      message: '文件上传成功！',
-      files: processedFiles,
-    };
+   ctx.body= resObj(200, processedFiles[0], '文件上传成功！');
+
+    // ctx.body = {
+    //   success: true,
+    //   code: 200,
+    //   message: '文件上传成功！',
+    //   files: processedFiles,
+    // };
   } catch (error) {
     // --- 6. 错误处理 ---
     console.error('文件上传失败:', error);
     ctx.status = 500; // Internal Server Error
-    ctx.body = {
-      code: -1,
-      message: '服务器内部错误，文件上传失败。',
-      error: error.message, // 在开发环境中可以返回具体错误
-    };
+    ctx.body = resObj(500, {}, '服务器内部错误，文件上传失败。');
+    // ctx.body = {
+    //   code: -1,
+    //   message: '服务器内部错误，文件上传失败。',
+    //   error: error.message, // 在开发环境中可以返回具体错误
+    // };
   }
 };
 
@@ -320,7 +323,8 @@ exports.deleteFile = async (ctx) => {
   const { filename } = ctx.request.body;
   const userId = ctx.state.user.id; // 获取当前用户ID
   if (!filename) {
-    ctx.body = { success: false, msg: '文件ID不能为空' };
+    ctx.body = resObj(500, {}, '文件ID不能为空');
+    // ctx.body = { success: false, msg: '文件ID不能为空' };
     return;
   }
 
@@ -333,7 +337,8 @@ exports.deleteFile = async (ctx) => {
     ctx.body = { success: true };
   } catch (err) {
     console.log('error', err);
-    ctx.body = { success: false, msg: '删除失败' };
+    ctx.body = resObj(500, {}, '删除失败');
+    // ctx.body = { success: false, msg: '删除失败' };
   }
 };
 
@@ -402,16 +407,18 @@ exports.getFileListByUserId = async (ctx) => {
       };
     });
 
+     // 平铺返回数据，而不是嵌套在 data 对象中
     ctx.body = {
-      success: true,
-      data: fileListData, // 分页数据
-      total: total[0].count, // 总记录数
-      page: page, // 当前页码
-      limit: limit, // 每页条数
+      ...resObj(200, fileListData, '查询成功'),
+      total: total[0].count,
+      page: parseInt(page),
+      limit: parseInt(limit)
     };
+
   } catch (error) {
     console.error('查询文件失败:', error);
-    ctx.body = { success: false, msg: '查询文件失败' };
+    // ctx.body = { success: false, msg: '查询文件失败' };
+    ctx.body = resObj(500, null, '查询文件失败');
   }
 };
 

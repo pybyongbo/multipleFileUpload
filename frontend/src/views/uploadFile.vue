@@ -100,15 +100,20 @@ const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => 
         onProgress({ percent })
       },
     });
-    console.log('res',res);
-    const uploaded = res && res.files[0]
-    previews.value.push(uploaded)
-    fileList.value.push({
-      name: uploaded.originalName,
-      url: uploaded.path
-    })
-    onSuccess(res.files)
+    // console.log('res',res);
+    const {code,data,message} = res;
+    if(code === 200){
+      // const uploaded = data && data.files[0];
+      previews.value.push(data)
+      fileList.value.push({
+        name: data.originalName,
+        url: data.path
+      })
+    onSuccess(data)
     uploadedCount.value++;
+  } else {
+     ElMessage.error(message)
+  }
 
   } catch (err) {
     console.log('err',err);

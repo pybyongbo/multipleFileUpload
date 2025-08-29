@@ -3,11 +3,8 @@ const router = require('koa-router')()
 // router.prefix('/users')
 const userController = require("../controller/user.js");
 
-
 // post 注册用户
 router.post("/register", userController.insertUserData);
-
-
 
 // post 用户登录
 router.post("/login", userController.userLogin);
