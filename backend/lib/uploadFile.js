@@ -198,17 +198,145 @@ exports.getFileActiveCountByUserId = (userId,conditions = {}) => {
 
 
 // 查询用户上传的文件状态为 'deleted'的文件列表
-exports.getFileListDeletedByUserId = (userId, page) => {
-  let _sql = `SELECT * FROM files WHERE uploader_id = ${userId} AND status = 'deleted' order by delete_time DESC limit ${(page -
-    1) *
-    10},10;`;
-  return query(_sql);
+exports.getFileListDeletedByUserId = (userId, conditions = {}) => {
+  // let _sql = `SELECT * FROM files WHERE uploader_id = ${userId} AND status = 'deleted' order by delete_time DESC limit ${(page -
+  //   1) *
+  //   10},10;`;
+  // return query(_sql);
+
+
+  let baseSql = `SELECT * FROM files WHERE uploader_id = ? AND status = 'deleted'`;
+  let params = [userId];
+  
+  // 添加文件名搜索条件
+  if (conditions.fileName) {
+    baseSql += ` AND original_name LIKE ?`;
+    params.push(`%${conditions.fileName}%`);
+  }
+  
+  // 添加文件类型搜索条件
+  if (conditions.fileType) {
+    // 如果是分类搜索（如 image, video 等）
+    if (['image', 'video', 'audio', 'document', 'archive'].includes(conditions.fileType)) {
+      switch (conditions.fileType) {
+        case 'image':
+          baseSql += ` AND mime_type LIKE 'image/%'`;
+          break;
+        case 'video':
+          baseSql += ` AND mime_type LIKE 'video/%'`;
+          break;
+        case 'audio':
+          baseSql += ` AND mime_type LIKE 'audio/%'`;
+          break;
+        case 'document':
+          baseSql += ` AND (mime_type LIKE 'application/%document%' 
+                          OR mime_type LIKE 'application/%officedocument%' 
+                          OR mime_type = 'application/pdf'
+                          OR mime_type = 'application/msword'
+                          OR mime_type = 'text/plain')`;
+          break;
+        case 'archive':
+          baseSql += ` AND (mime_type LIKE '%zip%' 
+                          OR mime_type LIKE '%rar%' 
+                          OR mime_type LIKE '%7z%' 
+                          OR mime_type LIKE '%tar%' 
+                          OR mime_type LIKE '%gz%')`;
+          break;
+      }
+    } else {
+      // 如果是具体的 MIME 类型
+      baseSql += ` AND mime_type = ?`;
+      params.push(conditions.fileType);
+    }
+  }
+  
+  // 添加删除时间范围搜索条件
+  if (conditions.startTime && conditions.endTime) {
+    baseSql += ` AND delete_time BETWEEN ? AND ?`;
+    params.push(conditions.startTime, conditions.endTime);
+  } else if (conditions.startTime) {
+    baseSql += ` AND delete_time >= ?`;
+    params.push(conditions.startTime);
+  } else if (conditions.endTime) {
+    baseSql += ` AND delete_time <= ?`;
+    params.push(conditions.endTime);
+  }
+
+   // 添加排序和分页
+  baseSql += ` ORDER BY upload_time DESC LIMIT ?, ?`;
+  params.push((conditions.page - 1) * 10, 10);
+  console.log('123131',JSON.stringify(conditions));
+  console.log('baseSql111',baseSql);
+  return query(baseSql, params);
+
+
+
 }
 
 // 查询用户上传的文件状态为 'deleted'的总数 
-exports.getFileDeletedCountByUserId = (userId) => {
-  let _sql = `SELECT count(*) as count FROM files WHERE uploader_id = ${userId} AND status = 'deleted'`;
-  return query(_sql);
+exports.getFileDeletedCountByUserId = (userId,conditions = {}) => {
+  // let _sql = `SELECT count(*) as count FROM files WHERE uploader_id = ${userId} AND status = 'deleted'`;
+  // return query(_sql);
+  
+  // 基础查询语句
+  let baseSql = `SELECT count(*) as count FROM files WHERE uploader_id = ? AND status = 'deleted'`;
+  let params = [userId];
+
+  // 添加文件名搜索条件
+  if (conditions.fileName) {
+    baseSql += ` AND original_name LIKE ?`;
+    params.push(`%${conditions.fileName}%`);
+  }
+  
+  // 添加文件类型搜索条件
+  if (conditions.fileType) {
+    // 如果是分类搜索（如 image, video 等）
+    if (['image', 'video', 'audio', 'document', 'archive'].includes(conditions.fileType)) {
+      switch (conditions.fileType) {
+        case 'image':
+          baseSql += ` AND mime_type LIKE 'image/%'`;
+          break;
+        case 'video':
+          baseSql += ` AND mime_type LIKE 'video/%'`;
+          break;
+        case 'audio':
+          baseSql += ` AND mime_type LIKE 'audio/%'`;
+          break;
+        case 'document':
+          baseSql += ` AND (mime_type LIKE 'application/%document%' 
+                          OR mime_type LIKE 'application/%officedocument%' 
+                          OR mime_type = 'application/pdf'
+                          OR mime_type = 'application/msword'
+                          OR mime_type = 'text/plain')`;
+          break;
+        case 'archive':
+          baseSql += ` AND (mime_type LIKE '%zip%' 
+                          OR mime_type LIKE '%rar%' 
+                          OR mime_type LIKE '%7z%' 
+                          OR mime_type LIKE '%tar%' 
+                          OR mime_type LIKE '%gz%')`;
+          break;
+      }
+    } else {
+      // 如果是具体的 MIME 类型
+      baseSql += ` AND mime_type = ?`;
+      params.push(conditions.fileType);
+    }
+  }
+  
+  // 添加删除时间范围搜索条件
+  if (conditions.startTime && conditions.endTime) {
+    baseSql += ` AND delete_time BETWEEN ? AND ?`;
+    params.push(conditions.startTime, conditions.endTime);
+  } else if (conditions.startTime) {
+    baseSql += ` AND delete_time >= ?`;
+    params.push(conditions.startTime);
+  } else if (conditions.endTime) {
+    baseSql += ` AND delete_time <= ?`;
+    params.push(conditions.endTime);
+  }
+  console.log('baseSqltotal',baseSql);
+  return query(baseSql, params);
 }
 
 

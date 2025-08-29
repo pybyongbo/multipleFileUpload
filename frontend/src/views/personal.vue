@@ -246,7 +246,6 @@
                         <el-button link type="primary" icon="Download" @click="singleFileDownload(scope.row)"></el-button>
                       </el-tooltip><el-divider direction="vertical" />
                       <el-tooltip content="预览" placement="top">
-                        <!-- :disabled="!isImage(scope.row.file_name)" -->
                         <el-button link type="primary" icon="View" @click="previewImage(scope.row.full_path)"
                           v-show="isImage(scope.row.file_name)"></el-button>
                       </el-tooltip><el-divider direction="vertical" v-show="isImage(scope.row.file_name)"/>
@@ -527,14 +526,25 @@ const searchFile = () => {
     limit: 10
   };
   
-  // 处理日期范围参数
+  // 处理日期范围参数 fileDeleteTime
   if (searchForm.fileUploadTime && Array.isArray(searchForm.fileUploadTime)) {
     const dateParams = formatDateRange(searchForm.fileUploadTime);
     searchParams = { ...searchParams, ...dateParams };
   }
-  pageActive.value = 1;
-  getFileList(searchParams);
 
+   if (searchForm.fileDeleteTime && Array.isArray(searchForm.fileDeleteTime)) {
+    const dateParams = formatDateRange(searchForm.fileDeleteTime);
+    searchParams = { ...searchParams, ...dateParams };
+  }
+
+
+  pageActive.value = 1;
+  pageDeleted.value = 1;
+
+ 
+
+  selectedTab.value === 'active' && getFileList(searchParams);
+  selectedTab.value === 'deleted' && getFileListDeleted(searchParams);
 }
 
 const resetForm =async () => {
@@ -545,6 +555,7 @@ const resetForm =async () => {
   searchForm.fileName = "";
   searchForm.fileType = "";
   searchForm.fileUploadTime = "";
+  searchForm.fileDeleteTime = "";
 
   switch(selectedTab.value) {
     case 'active':
@@ -721,9 +732,26 @@ const getFileList = async () => {
   }
 };
 
-const getFileListDeleted = async (page) => {
+const getFileListDeleted = async () => {
+
+  let searchParams = {
+    page:pageDeleted.value,
+    fileName: searchForm.fileName,
+    fileType: searchForm.fileType,
+    limit: 10
+  };
+
+  console.log('searchForm.fileDeleteTime',searchForm.fileDeleteTime);
+
+   // 处理日期范围参数
+  if (searchForm.fileDeleteTime && Array.isArray(searchForm.fileDeleteTime)) {
+    const dateParams = formatDateRange(searchForm.fileDeleteTime);
+    searchParams = { ...searchParams, ...dateParams };
+  } else {
+    searchParams = { ...searchParams,startTime:'',endTime:''  };
+  }
   try {
-    const res = await getFileListDeletedByUserId(page);
+    const res = await getFileListDeletedByUserId(searchParams);
     fileListDeletedData.value = res.data;
     totalDeletedCount.value = res.total;
   } catch (error) {
@@ -775,9 +803,11 @@ const upDataDeletedCurPage = (page) => {
 // 移除原来的 watch，使用更简单的方式
 const handleTabChange = () => {
   if (selectedTab.value === 'active') {
+    pageActive.value = 1;
     getFileList();
   } else if (selectedTab.value === 'deleted') {
-    getFileListDeleted(pageDeleted.value);
+    pageDeleted.value = 1;
+    getFileListDeleted();
   }
 };
 
@@ -801,7 +831,8 @@ watch(pageActive, (newPage) => {
 });
 
 watch(pageDeleted, (newPage) => {
-  getFileListDeleted(newPage);
+  pageDeleted.value = newPage;
+  getFileListDeleted();
 });
 
 // 监听标签页变化
@@ -826,6 +857,8 @@ const batchDelete = () => {
         });
         getCarouselTop5();
         getOtherFileList();
+        getTotalCount();
+
       } else {
         ElMessage.error(message);
       }
@@ -851,11 +884,11 @@ const deleteSingleFile =async (item,index) =>{
              page: pageActive.value,
             ...searchForm
           });
-            getTotalCount();
+          getTotalCount();
           getCarouselTop5();
-          getFileListDeleted(1);
+          getFileListDeleted();
         } else {
-          throw new Error(res.message)
+           ElMessage.error(res.message||'删除成功');
         }
       });
   })

@@ -417,7 +417,7 @@ exports.getFileListByUserId = async (ctx) => {
 
   } catch (error) {
     console.error('查询文件失败:', error);
-    // ctx.body = { success: false, msg: '查询文件失败' };
+
     ctx.body = resObj(500, null, '查询文件失败');
   }
 };
@@ -425,12 +425,28 @@ exports.getFileListByUserId = async (ctx) => {
 // 查询用户上传的文件状态为 'deleted'的文件列表
 exports.getFileListDeletedByUserId = async (ctx) => {
   const userId = ctx.state.user.id; // 获取当前用户ID
-  const page = parseInt(ctx.query.page) || 1; // 当前页码，默认为1
-  const limit = parseInt(ctx.query.limit) || 10; // 每页条数，默认为10
+  // const page = parseInt(ctx.query.page) || 1; // 当前页码，默认为1
+  // const limit = parseInt(ctx.query.limit) || 10; // 每页条数，默认为10
+
+  let { page, fileName, fileType,startTime,endTime,limit=10 } = ctx.request.body;
 
   try {
-    const files = await fileModel.getFileListDeletedByUserId(userId, page);
-    const total = await fileModel.getFileDeletedCountByUserId(userId); // 总记录数
+    const files = await fileModel.getFileListDeletedByUserId(userId, {
+      page,
+      fileName,
+      fileType,
+      startTime,
+      endTime,
+      limit,
+    });
+    const total = await fileModel.getFileDeletedCountByUserId(userId,{
+      page,
+      fileName,
+      fileType,
+      startTime,
+      endTime,
+      limit,
+    }); // 总记录数
 
     const fileListData = files.map((item) => {
       return {
@@ -442,15 +458,20 @@ exports.getFileListDeletedByUserId = async (ctx) => {
     });
 
     ctx.body = {
-      success: true,
-      data: fileListData, // 分页数据
-      total: total[0].count, // 总记录数
-      page: page, // 当前页码
-      limit: limit, // 每页条数
+      // success: true,
+      // data: fileListData, // 分页数据
+      // total: total[0].count, // 总记录数
+      // page: page, // 当前页码
+      // limit: limit, // 每页条数
+      ...resObj(200, fileListData, '查询成功'),
+      total: total[0].count,
+      page: parseInt(page),
+      limit: parseInt(limit)
     };
   } catch (error) {
     console.error('查询已删除文件失败:', error);
-    ctx.body = { success: false, msg: '查询已删除文件失败' };
+    ctx.body = resObj(500, null, '查询已删除文件失败');
+    // ctx.body = { success: false, msg: '查询已删除文件失败' };
   }
 };
 
@@ -460,7 +481,8 @@ exports.batchDeleteFile = async (ctx) => {
   const { fileList } = ctx.request.body;
   const ids = fileList.map((item) => item.id);
   if (!ids || !Array.isArray(ids) || ids.length === 0) {
-    return (ctx.body = { success: false, msg: '请选择要删除的文件' });
+    ctx.body = resObj(500, null, '请选择要删除的文件');
+    // return (ctx.body = { success: false, msg: '请选择要删除的文件' });
   }
 
   try {
@@ -480,13 +502,16 @@ exports.batchDeleteFile = async (ctx) => {
     // await Promise.all(deletePromises);
 
     if (result.affectedRows > 0) {
-      ctx.body = { success: true, code: 200, msg: '删除成功' };
+      ctx.body = resObj(200, null, '删除成功');
+      // ctx.body = { success: true, code: 200, msg: '删除成功' };
     } else {
-      ctx.body = { success: false, code: 500, msg: '删除失败' };
+      ctx.body = resObj(500, null, '删除失败');
+      // ctx.body = { success: false, code: 500, msg: '删除失败' };
     }
   } catch (error) {
     console.error('批量删除文件失败:', error);
-    ctx.body = { success: false, code: 500, msg: '批量删除文件失败' };
+    ctx.body = resObj(500, null, '批量删除文件失败');
+    // ctx.body = { success: false, code: 500, msg: '批量删除文件失败' };
   }
 };
 
@@ -497,9 +522,12 @@ exports.restoreFile = async (ctx) => {
   const fileId = ctx.params.fileId;
   console.log('fileId', fileId);
   if (await fileModel.restoreFile(fileId)) {
-    ctx.body = { success: true, code: 200, msg: '还原成功' };
+    ctx.body = resObj(200, null, '还原成功');
+    // ctx.body = { success: true, code: 200, msg: '还原成功' };
   } else {
-    ctx.body = { success: false, code: 500, msg: '还原失败' };
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '还原失败');
+    // ctx.body = { success: false, code: 500, msg: '还原失败' };
   }
 };
 
@@ -517,10 +545,12 @@ exports.getCarousel = async (ctx) => {
         }/uploads/${path.basename(item.file_path)}`,
       };
     });
-    ctx.body = { success: true, code: 200, data: fileListData };
+    ctx.body =resObj(200, fileListData, '查询成功');
+    // ctx.body = { success: true, code: 200, data: fileListData };
   } catch (error) {
     console.log('error', error);
-    ctx.body = { success: false, code: 500, message: error.message };
+    ctx.body = resObj(500, null, `${error.message}`);
+    // ctx.body = { success: false, code: 500, message: error.message };
   }
 };
 
@@ -541,10 +571,11 @@ exports.getOtherFileListTop5 = async (ctx) => {
         }/uploads/${path.basename(item.file_path)}`,
       };
     });
-    ctx.body = { success: true, code: 200, data: fileListData };
+    ctx.body = resObj(200, fileListData, '查询成功');
+    // ctx.body = { success: true, code: 200, data: fileListData };
   } catch (error) {
     console.log('error', error);
-    ctx.body = { success: false, code: 500, message: error.message };
+    ctx.body = resObj(500, null, `${error.message}`);
   }
 };
 
@@ -555,10 +586,7 @@ exports.uploadFileBase64 = async (ctx) => {
 
     // 检查参数
     if (!file) {
-      ctx.body = {
-        success: false,
-        msg: '文件数据不能为空',
-      };
+      ctx.body = resObj(400, null, '文件数据不能为空');
       return;
     }
 
@@ -620,21 +648,11 @@ exports.uploadFileBase64 = async (ctx) => {
     // 文件信息入库
     await fileModel.insertUploadInfo([fileInfo]);
 
-    ctx.body = {
-      success: true,
-      code: 200,
-      msg: '文件上传成功',
-      files: fileInfo,
-      // file: fileInfo
-    };
+    ctx.body = resObj(200, fileInfo, '文件上传成功');
+
   } catch (error) {
     console.error('Base64 文件上传失败:', error);
-    ctx.body = {
-      success: false,
-      code: 500,
-      msg: '文件上传失败',
-      error: error.message,
-    };
+    ctx.body = resObj(500, null, '文件上传失败');
   }
 };
 
@@ -701,11 +719,13 @@ exports.uploadFileBinary = async (ctx) => {
 
       // 检查是否有数据
       if (!binaryData || binaryData.length === 0) {
-        ctx.body = {
-          success: false,
-          code: 400,
-          msg: '文件数据不能为空',
-        };
+
+        ctx.body = resObj(400, null, '文件数据不能为空');
+        // ctx.body = {
+        //   success: false,
+        //   code: 400,
+        //   msg: '文件数据不能为空',
+        // };
         return;
       }
 
@@ -772,12 +792,14 @@ exports.uploadFileBinary = async (ctx) => {
       // 文件信息入库
       await fileModel.insertUploadInfo([fileInfo]);
 
-      ctx.body = {
-        success: true,
-        code: 200,
-        msg: '文件上传成功',
-        files: fileInfo,
-      };
+      ctx.body = resObj(200, fileInfo, '文件上传成功');
+
+      // ctx.body = {
+      //   success: true,
+      //   code: 200,
+      //   msg: '文件上传成功',
+      //   files: fileInfo,
+      // };
       return;
     }
 
@@ -837,22 +859,26 @@ exports.uploadFileBinary = async (ctx) => {
       // 文件信息入库
       await fileModel.insertUploadInfo(processedFiles);
 
-      ctx.body = {
-        success: true,
-        code: 200,
-        msg: `成功上传 ${processedFiles.length} 个文件`,
-        files: processedFiles.length === 1 ? processedFiles[0] : processedFiles,
-      };
+      ctx.body = resObj(200, processedFiles.length === 1 ? processedFiles[0] : processedFiles, `成功上传 ${processedFiles.length} 个文件`);
+
+      // ctx.body = {
+      //   success: true,
+      //   code: 200,
+      //   msg: `成功上传 ${processedFiles.length} 个文件`,
+      //   files: processedFiles.length === 1 ? processedFiles[0] : processedFiles,
+      // };
       return;
     }
   } catch (error) {
     console.error('二进制文件上传失败:', error);
-    ctx.body = {
-      success: false,
-      code: 500,
-      msg: '文件上传失败',
-      error: error.message,
-    };
+
+    ctx.body = resObj(500, null,  error.message|| '文件上传失败');
+    // ctx.body = {
+    //   success: false,
+    //   code: 500,
+    //   msg: '文件上传失败',
+    //   error: error.message,
+    // };
   }
 };
 
@@ -861,7 +887,8 @@ exports.completeDeleteFile = async (ctx) => {
   const { filename } = ctx.request.body;
   const userId = ctx.state.user.id; // 获取当前用户ID
   if (!filename) {
-    ctx.body = { success: false, msg: '文件ID不能为空' };
+     ctx.body = resObj(400, null, '文件ID不能为空');
+    // ctx.body = { success: false, msg: '文件ID不能为空' };
     return;
   }
 
@@ -874,17 +901,18 @@ exports.completeDeleteFile = async (ctx) => {
     ctx.body = { success: true };
   } catch (err) {
     console.log('error', err);
-    ctx.body = { success: false, msg: '删除失败' };
+     ctx.body = resObj(400, null, '删除失败');
+    // ctx.body = { success: false, msg: '删除失败' };
   }
 };
 
 // 查询所有上传文件的类型
 exports.getFileTypeList = async (ctx) => {
-
   const result = await fileModel.queryFileType();
-  ctx.body = {
-    success: true,
-    code: 200,
-    data: result,
-  };
+  ctx.body = resObj(200, result, '查询文件的类型成功');
+  // ctx.body = {
+  //   success: true,
+  //   code: 200,
+  //   data: result,
+  // };
 };

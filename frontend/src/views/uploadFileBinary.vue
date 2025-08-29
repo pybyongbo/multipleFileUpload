@@ -126,11 +126,13 @@ const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => 
       }
     });
     
-    console.log('res', res);
+    // console.log('res', res);
+
+    const {code,data,message} = res;
     
-    if (res.success) {
+    if (code === 200) {
       // 处理返回的文件列表
-      const uploadedFiles = Array.isArray(res.files) ? res.files : [res.files];
+      const uploadedFiles = Array.isArray(data) ? data : [data];
       
       uploadedFiles.forEach(uploadedFile => {
         previews.value.push(uploadedFile);
@@ -148,9 +150,11 @@ const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => 
       checkAllFilesUploaded();
       
       // 调用成功回调
-      onSuccess(res);
+      onSuccess(data);
     } else {
-      throw new Error(res.msg || '上传失败');
+
+      ElMessage.error(message ||'上传失败');
+      // throw new Error(res.msg || '上传失败');
     }
   } catch (err) {
     console.error('上传失败:', err);

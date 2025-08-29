@@ -30,8 +30,8 @@ export const getFileListByUserId = (params) => {
 
 
 // 获取当前用户删除的文件列表
-export const getFileListDeletedByUserId = (page) => {
-  return http.get(`/fileListDeleted?page=${page}`);
+export const getFileListDeletedByUserId = (params) => {
+  return http.post('/fileListDeleted', params);
 };
 
 // 删除文件 (列表页面,单个,多个)
