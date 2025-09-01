@@ -2,9 +2,19 @@ const Koa = require('koa')
 const app = new Koa()
 const views = require('koa-views')
 const json = require('koa-json')
-const path = require('path');
+const { resolve } = require('path');
+const ip = require('koa-ip');
 const onerror = require('koa-onerror')
 const logger = require('koa-logger')
+// 使用 koa-ip 中间件
+app.use(ip({
+  proxy: true, // 如果使用代理
+  proxyIpHeader: 'X-Forwarded-For' // 指定代理头
+}));
+const envFilePath = resolve(__dirname,  `.env.${process.env.NODE_ENV || 'development'}`);
+require('dotenv').config({
+  path: envFilePath
+});
 
 // 添加静态文件CORS处理中间件
 app.use(async (ctx, next) => {
@@ -22,9 +32,7 @@ app.use(async (ctx, next) => {
 });
 app.use(require('koa-static')(__dirname + '/public'))
 // 添加 koa-body,使用解构赋值的方式导入 koaBody
-
 const { koaBody } = require('koa-body')
-
 const cors = require('koa2-cors');
 const jwt = require('koa-jwt');
 const config = require('./config/index.js');
@@ -43,7 +51,10 @@ onerror(app)
 // app.use(cors())
 app.use(
   cors({
-    
+    origin: function (ctx) {
+      return process.env.CORS_ORIGIN;
+    }, 
+    // origin: 'http://localhost:3000',
     exposeHeaders: ['WWW-Authenticate', 'Content-Type', 'Server-Authorization'],
     maxAge: 3600,
     credentials: true,

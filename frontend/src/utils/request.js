@@ -4,12 +4,18 @@ import { AxiosCanceler } from './axiosConfig.js';
 import { formatParams } from './tools';
 import useUserStore from '@/store/modules/user';
 
-const isPro = import.meta.env.NODE_ENV === 'production';
+// const isPro = import.meta.env.NODE_ENV === 'production';
 
+// const devBaseUrl = 'http://localhost:3004'; // 确保端口是 3004
+// const proBaseUrl = import.meta.env.API_DOMAIN;
+// const baseURL = isPro ? proBaseUrl : devBaseUrl;
+// 使用 Vite 环境变量
+const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:3004' : '');
 
-const devBaseUrl = 'http://localhost:3004'; // 确保端口是 3004
-const proBaseUrl = import.meta.env.API_DOMAIN;
-const baseURL = isPro ? proBaseUrl : devBaseUrl;
+console.log('API Base URL:', baseURL);
+console.log('Environment:', import.meta.env.MODE);
+
+console.log('baseURL',baseURL);
 
 const config = {
   timeout: 60000, // 超时时间
