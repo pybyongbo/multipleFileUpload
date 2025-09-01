@@ -4,8 +4,7 @@ import { AxiosCanceler } from './axiosConfig.js';
 import { formatParams } from './tools';
 import useUserStore from '@/store/modules/user';
 
-const isPro = import.meta.env.NODE_ENV === 'production';
-
+// const isPro = import.meta.env.NODE_ENV === 'production';
 
 // const devBaseUrl = 'http://localhost:3004'; // 确保端口是 3004
 // const proBaseUrl = import.meta.env.API_DOMAIN;

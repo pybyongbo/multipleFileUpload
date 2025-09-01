@@ -1,6 +1,7 @@
 const userModel = require('../lib/user.js');
 const config = require('../config/index.js');
 const md5 = require("md5");
+
 const jwt = require('jsonwebtoken');
 /**
  * 返回值
@@ -121,6 +122,9 @@ exports.userLogin = async ctx => {
       const token = jwt.sign(userInfo, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
        // 更新最后登录时间
        await userModel.updateUserLastLogin(res[0].id, new Date());
+
+        const clientIp = ctx.ip; // 获取客户端IP地址
+        console.log('clientIp',clientIp);
 
        // 更新登录IP地址
        await userModel.updateUserLastLoginIp(res[0].id, ctx.request.ip);

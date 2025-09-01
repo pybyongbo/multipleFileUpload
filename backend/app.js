@@ -3,14 +3,19 @@ const app = new Koa()
 const views = require('koa-views')
 const json = require('koa-json')
 const { resolve } = require('path');
+const ip = require('koa-ip');
 const onerror = require('koa-onerror')
 const logger = require('koa-logger')
-
+// 使用 koa-ip 中间件
+app.use(ip({
+  proxy: true, // 如果使用代理
+  proxyIpHeader: 'X-Forwarded-For' // 指定代理头
+}));
 const envFilePath = resolve(__dirname,  `.env.${process.env.NODE_ENV || 'development'}`);
 require('dotenv').config({
   path: envFilePath
 });
-// console.log('环境变量文件路径11:', envFilePath);
+
 // 添加静态文件CORS处理中间件
 app.use(async (ctx, next) => {
   // 如果是/uploads/路径下的请求，添加CORS头部

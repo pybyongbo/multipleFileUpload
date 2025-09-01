@@ -1,6 +1,6 @@
 // const multer = require('koa-multer');
 const path = require('path');
-const sharp = require('sharp');
+// const sharp = require('sharp');
 const fs = require('fs');
 // const { writeFileSync } = require('fs');
 const fileModel = require('../lib/uploadFile.js');
@@ -101,97 +101,97 @@ if (!fs.existsSync(uploadDir)) {
 //   }
 // }
 
-// 添加水印的函数
-async function addWatermark(imagePath, watermarkText) {
-  try {
-    const outputImagePath = imagePath.replace(/\.[^/.]+$/, '_watermarked$&');
+// 添加水印的函数. (服务器部署的时候有问题.导致项目启不起来)
+// async function addWatermark(imagePath, watermarkText) {
+//   try {
+//     const outputImagePath = imagePath.replace(/\.[^/.]+$/, '_watermarked$&');
 
-    // 获取原图信息
-    const image = sharp(imagePath);
-    const metadata = await image.metadata();
+//     // 获取原图信息
+//     const image = sharp(imagePath);
+//     const metadata = await image.metadata();
 
-    // 根据原图尺寸动态调整水印尺寸
-    const maxWatermarkWidth = Math.min(metadata.width * 0.5, 300); // 水印最大宽度为原图宽度的一半或300像素
-    const maxWatermarkHeight = Math.min(metadata.height * 0.1, 50); // 水印最大高度为原图高度的10%或50像素
+//     // 根据原图尺寸动态调整水印尺寸
+//     const maxWatermarkWidth = Math.min(metadata.width * 0.5, 300); // 水印最大宽度为原图宽度的一半或300像素
+//     const maxWatermarkHeight = Math.min(metadata.height * 0.1, 50); // 水印最大高度为原图高度的10%或50像素
 
-    // 创建水印文本
-    const watermarkBuffer = await sharp({
-      create: {
-        width: Math.max(100, Math.floor(maxWatermarkWidth)), // 最小100像素
-        height: Math.max(30, Math.floor(maxWatermarkHeight)), // 最小30像素
-        channels: 4,
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      },
-    })
-      .composite([
-        {
-          input: {
-            text: {
-              text: watermarkText,
-              font: 'Arial-Bold',
-              rgba: true,
-              color: 'rgba(255,255,255,0.7)', // 半透明白色
-              width: Math.max(100, Math.floor(maxWatermarkWidth)),
-              height: Math.max(30, Math.floor(maxWatermarkHeight)),
-            },
-          },
-        },
-      ])
-      .png()
-      .toBuffer();
+//     // 创建水印文本
+//     const watermarkBuffer = await sharp({
+//       create: {
+//         width: Math.max(100, Math.floor(maxWatermarkWidth)), // 最小100像素
+//         height: Math.max(30, Math.floor(maxWatermarkHeight)), // 最小30像素
+//         channels: 4,
+//         background: { r: 0, g: 0, b: 0, alpha: 0 },
+//       },
+//     })
+//       .composite([
+//         {
+//           input: {
+//             text: {
+//               text: watermarkText,
+//               font: 'Arial-Bold',
+//               rgba: true,
+//               color: 'rgba(255,255,255,0.7)', // 半透明白色
+//               width: Math.max(100, Math.floor(maxWatermarkWidth)),
+//               height: Math.max(30, Math.floor(maxWatermarkHeight)),
+//             },
+//           },
+//         },
+//       ])
+//       .png()
+//       .toBuffer();
 
-    // 获取水印实际尺寸
-    const watermarkMetadata = await sharp(watermarkBuffer).metadata();
+//     // 获取水印实际尺寸
+//     const watermarkMetadata = await sharp(watermarkBuffer).metadata();
 
-    // 确保水印尺寸不超过原图
-    let watermarkWidth = Math.min(watermarkMetadata.width, metadata.width - 20);
-    let watermarkHeight = Math.min(
-      watermarkMetadata.height,
-      metadata.height - 20
-    );
+//     // 确保水印尺寸不超过原图
+//     let watermarkWidth = Math.min(watermarkMetadata.width, metadata.width - 20);
+//     let watermarkHeight = Math.min(
+//       watermarkMetadata.height,
+//       metadata.height - 20
+//     );
 
-    // 如果水印仍然太大，重新调整
-    if (
-      watermarkWidth > metadata.width - 20 ||
-      watermarkHeight > metadata.height - 20
-    ) {
-      const scale = Math.min(
-        (metadata.width - 20) / watermarkMetadata.width,
-        (metadata.height - 20) / watermarkMetadata.height
-      );
+//     // 如果水印仍然太大，重新调整
+//     if (
+//       watermarkWidth > metadata.width - 20 ||
+//       watermarkHeight > metadata.height - 20
+//     ) {
+//       const scale = Math.min(
+//         (metadata.width - 20) / watermarkMetadata.width,
+//         (metadata.height - 20) / watermarkMetadata.height
+//       );
 
-      watermarkWidth = Math.floor(watermarkMetadata.width * scale);
-      watermarkHeight = Math.floor(watermarkMetadata.height * scale);
-    }
+//       watermarkWidth = Math.floor(watermarkMetadata.width * scale);
+//       watermarkHeight = Math.floor(watermarkMetadata.height * scale);
+//     }
 
-    // 重新生成合适尺寸的水印
-    const resizedWatermarkBuffer = await sharp(watermarkBuffer)
-      .resize(watermarkWidth, watermarkHeight)
-      .png()
-      .toBuffer();
+//     // 重新生成合适尺寸的水印
+//     const resizedWatermarkBuffer = await sharp(watermarkBuffer)
+//       .resize(watermarkWidth, watermarkHeight)
+//       .png()
+//       .toBuffer();
 
-    // 计算水印位置（距离底部10px，距离右边10px）
-    const left = Math.max(10, metadata.width - watermarkWidth - 10);
-    const top = Math.max(10, metadata.height - watermarkHeight - 10);
+//     // 计算水印位置（距离底部10px，距离右边10px）
+//     const left = Math.max(10, metadata.width - watermarkWidth - 10);
+//     const top = Math.max(10, metadata.height - watermarkHeight - 10);
 
-    // 应用水印到图片
-    await image
-      .composite([
-        {
-          input: resizedWatermarkBuffer,
-          top: top,
-          left: left,
-        },
-      ])
-      .toFile(outputImagePath);
+//     // 应用水印到图片
+//     await image
+//       .composite([
+//         {
+//           input: resizedWatermarkBuffer,
+//           top: top,
+//           left: left,
+//         },
+//       ])
+//       .toFile(outputImagePath);
 
-    return outputImagePath;
-  } catch (error) {
-    console.error('添加水印失败:', error);
-    // 如果添加水印失败，返回原图路径
-    return imagePath;
-  }
-}
+//     return outputImagePath;
+//   } catch (error) {
+//     console.error('添加水印失败:', error);
+//     // 如果添加水印失败，返回原图路径
+//     return imagePath;
+//   }
+// }
 
 // 上传接口
 // router.post('/upload', upload.array('files', 5), async (ctx) => {
@@ -592,19 +592,22 @@ exports.uploadFileBase64 = async (ctx) => {
     // 如果是图片文件，添加水印
     if (fileInfo.mimeType.startsWith('image/')) {
       try {
-        const now = new Date();
-        const watermarkedImagePath = await addWatermark(
-          filePath,
-          `${now.getFullYear()}-${
-            now.getMonth() + 1
-          }-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
-        );
+        // const now = new Date();
+        // const watermarkedImagePath = await addWatermark(
+        //   filePath,
+        //   `${now.getFullYear()}-${
+        //     now.getMonth() + 1
+        //   }-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
+        // );
 
         // 更新文件信息
-        fileInfo.isWatermarked = 1;
-        fileInfo.full_path = `${ctx.request.protocol}://${
+        // fileInfo.isWatermarked = 1;
+        // fileInfo.full_path = `${ctx.request.protocol}://${
+        //   ctx.request.host
+        // }/uploads/${path.basename(watermarkedImagePath)}`;
+        fileInfo.filePath = `${ctx.request.protocol}://${
           ctx.request.host
-        }/uploads/${path.basename(watermarkedImagePath)}`;
+        }/uploads/${path.basename(filePath)}`;
       } catch (watermarkError) {
         console.error('添加水印失败:', watermarkError);
       }
@@ -618,7 +621,6 @@ exports.uploadFileBase64 = async (ctx) => {
       code: 200,
       msg: '文件上传成功',
       files: fileInfo,
-      // file: fileInfo
     };
   } catch (error) {
     console.error('Base64 文件上传失败:', error);
@@ -742,25 +744,25 @@ exports.uploadFileBinary = async (ctx) => {
       };
 
       // 如果是图片文件，添加水印
-      if (fileInfo.mimeType && fileInfo.mimeType.startsWith('image/')) {
-        try {
-          const now = new Date();
-          const watermarkedImagePath = await addWatermark(
-            filePath,
-            `${now.getFullYear()}-${
-              now.getMonth() + 1
-            }-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
-          );
+      // if (fileInfo.mimeType && fileInfo.mimeType.startsWith('image/')) {
+      //   try {
+      //     const now = new Date();
+      //     const watermarkedImagePath = await addWatermark(
+      //       filePath,
+      //       `${now.getFullYear()}-${
+      //         now.getMonth() + 1
+      //       }-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
+      //     );
 
-          // 更新文件信息
-          fileInfo.isWatermarked = 1;
-          fileInfo.full_path = `${ctx.request.protocol}://${
-            ctx.request.host
-          }/uploads/${path.basename(watermarkedImagePath)}`;
-        } catch (watermarkError) {
-          console.error('添加水印失败:', watermarkError);
-        }
-      }
+      //     // 更新文件信息
+      //     fileInfo.isWatermarked = 1;
+      //     fileInfo.full_path = `${ctx.request.protocol}://${
+      //       ctx.request.host
+      //     }/uploads/${path.basename(watermarkedImagePath)}`;
+      //   } catch (watermarkError) {
+      //     console.error('添加水印失败:', watermarkError);
+      //   }
+      // }
 
       // 文件信息入库
       await fileModel.insertUploadInfo([fileInfo]);
@@ -804,25 +806,25 @@ exports.uploadFileBinary = async (ctx) => {
         };
 
         // 如果是图片文件，添加水印
-        if (fileInfo.mimeType && fileInfo.mimeType.startsWith('image/')) {
-          try {
-            const now = new Date();
-            const watermarkedImagePath = await addWatermark(
-              file.path,
-              `${now.getFullYear()}-${
-                now.getMonth() + 1
-              }-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
-            );
+        // if (fileInfo.mimeType && fileInfo.mimeType.startsWith('image/')) {
+        //   try {
+        //     const now = new Date();
+        //     const watermarkedImagePath = await addWatermark(
+        //       file.path,
+        //       `${now.getFullYear()}-${
+        //         now.getMonth() + 1
+        //       }-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
+        //     );
 
-            // 更新文件信息
-            fileInfo.isWatermarked = 1;
-            fileInfo.full_path = `${ctx.request.protocol}://${
-              ctx.request.host
-            }/uploads/${path.basename(watermarkedImagePath)}`;
-          } catch (watermarkError) {
-            console.error('添加水印失败:', watermarkError);
-          }
-        }
+        //     // 更新文件信息
+        //     fileInfo.isWatermarked = 1;
+        //     fileInfo.full_path = `${ctx.request.protocol}://${
+        //       ctx.request.host
+        //     }/uploads/${path.basename(watermarkedImagePath)}`;
+        //   } catch (watermarkError) {
+        //     console.error('添加水印失败:', watermarkError);
+        //   }
+        // }
 
         processedFiles.push(fileInfo);
       }
