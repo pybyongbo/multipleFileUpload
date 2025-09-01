@@ -144,16 +144,15 @@ function handleRegister() {
       loading.value = true
        // 准备提交的数据
       const submitData = { ...registerForm.value };
-      
       // 如果邮箱为空字符串，可以删除该字段或设为null
       if (!submitData.email) {
         delete submitData.email;
       }
       addUser(submitData).then(res => {
         console.log('res',res);
-        const { code, message } = res;
+        const { code,data, message } = res;
         if(code === 200) {
-          const username = registerForm.value.username
+          const username = data.username
         ElMessageBox.alert("<font color='red'>恭喜你，您的账号 " + username + " 注册成功！</font>", "系统提示", {
           dangerouslyUseHTMLString: true,
           type: "success",

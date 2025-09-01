@@ -113,20 +113,23 @@ const customUploadRequest = async ({ file, onProgress, onSuccess, onError }) => 
         fileName: file.name,
         file: base64Data,
       })
-      console.log('res', res);
-      if (res.code === 200) {
-        previews.value.push(res.files)
+      // console.log('res', res);
+      const {code,data,message} = res;
+      if (code === 200) {
+        previews.value.push(data)
         fileList.value.push({
-          name: res.files.originalName,
-          url: res.files.path
+          name: data.originalName,
+          url: data.path
         })
-        onSuccess(res.files);
+        onSuccess(data);
         // 从正在上传列表中移除
         uploadingFiles.value = uploadingFiles.value.filter(uid => uid !== file.uid);
         uploadedCount.value++;
 
          // 检查是否所有文件都已上传完成
           checkAllFilesUploaded();
+      } else {
+        ElMessage.error(message);
       }
     };
     reader.readAsArrayBuffer(file);

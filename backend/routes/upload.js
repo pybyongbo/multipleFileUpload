@@ -38,7 +38,7 @@ router.post('/delete', fileController.deleteFile);
 router.post('/fileList', fileController.getFileListByUserId);
 
 
-router.get('/fileListDeleted', fileController.getFileListDeletedByUserId);
+router.post('/fileListDeleted', fileController.getFileListDeletedByUserId);
 
 
 // 列表页面删除接口  (支持批量删除操作)

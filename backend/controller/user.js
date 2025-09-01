@@ -11,11 +11,11 @@ const jwt = require('jsonwebtoken');
  * @return
  */
 
-var resObj = (code, msg, data) => {
+const resObj = (code,data, msg ) => {
   return {
-    status: code,
-    msg: msg,
+    code: code,
     data: data,
+    msg: msg,
   };
 };
 
@@ -61,7 +61,7 @@ exports.insertUserData = async (ctx) => {
     const is_active = ctx.request.body.is_active !== undefined ? ctx.request.body.is_active : 0;
     
     // 插入数据库
-    await userModel.registerUser([
+   const result = await userModel.registerUser([
       username.trim(), 
       email?.trim(), 
       md5(password.trim()), // 使用 md5 加密密码
@@ -70,28 +70,33 @@ exports.insertUserData = async (ctx) => {
       last_login, 
       is_active
     ]);
+
+    ctx.body = resObj(200, { 
+      id: result.id,  // 返回用户ID
+      username: username.trim(),
+      email: email?.trim()
+    },'注册成功', );
     
-    ctx.body = {
-      code: 200,
-      message: '新增成功',
-    };
+
   } catch (err) {
     console.error('数据库操作错误:', err);
     
     // 根据错误类型返回不同的错误信息
     if (err.code === 'ER_DUP_ENTRY') {
       ctx.status = 409; // 冲突
-      ctx.body = {
-        code: 409,
-        message: '用户名或邮箱已存在',
-      };
+      ctx.body = resObj(409, {}, '用户名或邮箱已存在');
+      // ctx.body = {
+      //   code: 409,
+      //   message: '用户名或邮箱已存在',
+      // };
     } else {
       ctx.status = 500;
-      ctx.body = {
-        code: 500,
-        message: '服务器内部错误',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
-      };
+      ctx.body = resObj(500, {}, `服务器内部错误,${process.env.NODE_ENV} === 'development' ? ${err.message} : undefined`);
+      // ctx.body = {
+      //   code: 500,
+      //   message: '服务器内部错误',
+      //   error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      // };
     }
   }
 };
@@ -105,7 +110,6 @@ exports.userLogin = async ctx => {
     .findDataByName(username)
     .then(async result => {
       let res = result;
-      // console.log(123,res,md5(password) === res[0]["pass"]);
       if (
         res.length &&
         username === res[0]["username"] &&
@@ -129,20 +133,28 @@ exports.userLogin = async ctx => {
        // 更新登录IP地址
        await userModel.updateUserLastLoginIp(res[0].id, ctx.request.ip);
 
-        ctx.body = {
-          code: 200,
-          data: {
+       ctx.body = resObj(200, 
+        {
           user: userInfo,
           token: token
-        },
-          message: "登录成功"
-        };
+        }, '登录成功'
+       )
+        // ctx.body = {
+        //   code: 200,
+        //   data: {
+        //   user: userInfo,
+        //   token: token
+        // },
+        //   message: "登录成功"
+        // };
 
       } else {
-        ctx.body = {
-          code: 500,
-          message: "用户名或密码错误,或者没有激活账号"
-        };
+
+        ctx.body = resObj(500, {}, '用户名或密码错误,或者没有激活账号')
+        // ctx.body = {
+        //   code: 500,
+        //   message: "用户名或密码错误,或者没有激活账号"
+        // };
         console.log("用户名或密码错误!");
       }
     })
@@ -163,25 +175,30 @@ exports.getCurrentUser = async ctx => {
       const user = result[0];
       delete user.password; // 不返回密码字段
 
-      ctx.body = {
-        code: 200,
-        message: '获取用户信息成功',
-        data: user
-      };
+      ctx.body = resObj(200, user, '获取用户信息成功');
+
+      // ctx.body = {
+      //   code: 200,
+      //   message: '获取用户信息成功',
+      //   data: user
+      // };
     } else {
       ctx.status = 404;
-      ctx.body = {
-        code: 404,
-        message: '用户不存在'
-      };
+
+       ctx.body = resObj(404, null, '用户不存在');
+      // ctx.body = {
+      //   code: 404,
+      //   message: '用户不存在'
+      // };
     }
   } catch (err) {
     console.error(err);
     ctx.status = 500;
-    ctx.body = {
-      code: 500,
-      message: '服务器内部错误'
-    };
+    ctx.body = resObj(500, null, '服务器内部错误');
+    // ctx.body = {
+    //   code: 500,
+    //   message: '服务器内部错误'
+    // };
   }
 };
 
@@ -189,17 +206,19 @@ exports.getCurrentUser = async ctx => {
 exports.userLogout = async ctx => {
   try {
     // JWT 本身是无状态的，客户端删除 token 即可实现登出
-    ctx.body = {
-      code: 200,
-      message: '登出成功'
-    };
+    ctx.body = resObj(200, null, '登出成功');
+    // ctx.body = {
+    //   code: 200,
+    //   message: '登出成功'
+    // };
   } catch (err) {
     console.error(err);
     ctx.status = 500;
-    ctx.body = {
-      code: 500,
-      message: '服务器内部错误'
-    };
+    ctx.body = resObj(500, null, '服务器内部错误');
+    // ctx.body = {
+    //   code: 500,
+    //   message: '服务器内部错误'
+    // };
   }
 };
 
@@ -210,16 +229,18 @@ exports.updateEmail = async ctx => {
     const { email } = ctx.request.body;
 
     await userModel.updateUserEmail(userId, email.trim());
-      ctx.body = {
-        code: 200,
-        message: '更新邮箱成功',
-      };
+    ctx.body = resObj(200, null, '更新邮箱成功');
+    // ctx.body = {
+    //   code: 200,
+    //   message: '更新邮箱成功',
+    // };
   } catch (err) {
     console.error(err);
     ctx.status = 500;
-    ctx.body = {
-      code: 500,
-      message: '服务器内部错误'
-    };
+    ctx.body = resObj(500, null, '服务器内部错误');
+    // ctx.body = {
+    //   code: 500,
+    //   message: '服务器内部错误'
+    // };
   }
 }
