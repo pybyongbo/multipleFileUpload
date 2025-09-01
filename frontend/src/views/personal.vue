@@ -1367,7 +1367,7 @@ const completeDelete = async (item) => {
 }
 .hd-title{
     span.manage-center{
-      margin-top:-8px;
+      margin-top:-11px;
     }
   }
 
