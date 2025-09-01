@@ -1,6 +1,6 @@
 // const multer = require('koa-multer');
 const path = require('path');
-// const sharp = require('sharp');
+
 const fs = require('fs');
 const fileModel = require('../lib/uploadFile.js');
 
