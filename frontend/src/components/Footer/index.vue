@@ -142,7 +142,7 @@ onMounted(() => {
     gap: 8px;
     
    .link {
-      color: #3498db;
+      color: var(--el-color-primary-light-3);
       text-decoration: none;
       font-weight: 500;
       transition: all 0.3s ease;
@@ -151,7 +151,7 @@ onMounted(() => {
       gap: 4px;
       float:right;
       &:hover {
-        color: #5dade2;
+        color:var(--el-color-primary); 
         text-decoration: underline;
       }
       

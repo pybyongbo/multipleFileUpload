@@ -4,6 +4,8 @@ import 'element-plus/dist/index.css';
 import 'dayjs/locale/zh-cn'; //中文
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
 import './style.css';
+// 引入自定义主题样式而不是默认样式
+import './styles/element-variables.scss'
 
 import store from './store'
 import App from './App.vue';
