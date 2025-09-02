@@ -98,12 +98,28 @@
               <span class="manage-center">文件下载中心 (后端接口提供下载)</span>
 
               <div class="batch-btn-group">
-                <el-button type="primary" size="small" @click="showMode='list'" ><el-icon>
-                    <List />
-                  </el-icon>列表模式</el-button>
-                <el-button type="danger" size="small" @click="showMode='card'"> <el-icon>
-                    <Grid />
+                  <!--
+                  <el-button type="primary" size="small" @click="showMode='list'" ><el-icon>
+                      <List />
+                    </el-icon>列表模式</el-button>
+                  <el-button type="danger" size="small" @click="showMode='card'"> <el-icon>
+                      <Grid />
                   </el-icon>卡片模式</el-button>
+                -->
+                <el-radio-group v-model="showMode" style="margin-bottom: 6px">
+                    <el-radio-button value="list">
+                      <el-tooltip content="列表模式" placement="top">
+                        <el-icon><List /></el-icon>
+                      </el-tooltip>
+                    </el-radio-button>
+                 
+                    <el-radio-button value="card">
+                      <el-tooltip content="卡片模式" placement="top">
+                        <el-icon><Grid /></el-icon>
+                      </el-tooltip>
+                    </el-radio-button>
+                </el-radio-group>
+
               </div>
             </div>
           </template>
@@ -160,7 +176,10 @@
             <el-card v-for="(file, index) in fileListData" :key="index" shadow="hover">
               <template #header>
                 <div class="card-header">
+                   <el-tooltip :content="file.file_name" placement="top"
+                        :disabled="!shouldShowTooltip(file.file_name)">
                   <span>{{ file.file_name }}</span>
+                  </el-tooltip>
                 </div>
               </template>
                  <img v-if="getCategoryLabel(getMimeTypeCategory(file.mime_type)) == '图片'" :src="file.full_path" />
@@ -742,12 +761,12 @@ const downloadFileToLocal = async (fileId, fileName) => {
 .card-list {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: space-around;
   gap: 10px;
 
   .el-card {
     height: 300px;
-    width: 250px;
+    width: 266px;
   }
 
   :deep(.el-card__header) {

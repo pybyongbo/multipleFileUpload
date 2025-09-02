@@ -290,7 +290,10 @@
                         :disabled="!shouldShowTooltip(scope.row.full_path)">
                         <span class="file-path-text">{{ scope.row.full_path }}</span>
                       </el-tooltip>
-                      <el-link underline="hover" icon="DocumentCopy" v-copyText="scope.row.full_path" v-copyText:callback="()=>copyTextSuccess(scope.row.full_path)" style="float:right"
+                      <el-link underline="hover" icon="DocumentCopy" 
+                      v-copyText="scope.row.full_path" 
+                      v-copyText:callback="()=>copyTextSuccess(scope.row.full_path)" 
+                        style="float:right"
                         type="danger">&nbsp;复制</el-link>
                     </div>
                   </template>
