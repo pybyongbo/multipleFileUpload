@@ -384,7 +384,7 @@ const sliceProgress = (needObj, taskArrItem, progressTotal) => {
 // 暂停的,继续上传的,上传中断的自动继续上传
 const getTaskArr = async () => {
   const arr = await localForage.getItem('taskArr').catch(() => { })
-  console.log('arr',arr);
+
   if (!arr || arr.length === 0) { return }
   for (let i = 0; i < arr.length; i++) {
     const item = arr[i]

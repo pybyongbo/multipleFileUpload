@@ -125,7 +125,7 @@ exports.getFileListByUserId = (userId, conditions = {}) => {
   
   // 添加排序和分页
   baseSql += ` ORDER BY upload_time DESC LIMIT ?, ?`;
-  params.push((conditions.page - 1) * 10, 10);
+  params.push((conditions.page - 1) * 10, conditions.limit);
   
   return query(baseSql, params);
 }
@@ -263,7 +263,7 @@ exports.getFileListDeletedByUserId = (userId, conditions = {}) => {
   }
 
    // 添加排序和分页
-  baseSql += ` ORDER BY upload_time DESC LIMIT ?, ?`;
+  baseSql += ` ORDER BY delete_time DESC LIMIT ?, ?`;
   params.push((conditions.page - 1) * 10, 10);
   console.log('123131',JSON.stringify(conditions));
   console.log('baseSql111',baseSql);
@@ -426,3 +426,10 @@ exports.queryFileType = async () => {
   let _sql = `SELECT DISTINCT(mime_type) FROM files`;
   return query(_sql);
 }
+
+
+// 根据文件ID获取文件信息
+exports.getFileById = (fileId) => {
+  let _sql = `SELECT * FROM files WHERE id = ? AND status != 'deleted'`;
+  return query(_sql, [fileId]);
+};

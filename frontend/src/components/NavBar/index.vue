@@ -49,23 +49,23 @@ function handleCommand(command) {
       </div>
       <div class="nav-menu">
         <router-link to="/uploadfile" class="nav-link">
-          <!-- <i class="el-icon-folder"></i> -->
           首页
         </router-link> 
         <router-link to="/uploadfileBase64" class="nav-link">
-          <!-- <i class="el-icon-picture"></i> -->
           Base64上传
         </router-link> 
         <router-link to="/uploadfileBinary" class="nav-link">
-          <!-- <i class="el-icon-data-line"></i> -->
           二进制上传
         </router-link>
         <router-link to="/uploadfileChunk" class="nav-link">
-          <!-- <i class="el-icon-upload"></i> -->
           大文件分片上传
         </router-link>
+
+         <router-link to="/downloadlist" class="nav-link">
+          接口下载文件
+        </router-link>
+
         <router-link to="/personal" class="nav-link">
-          <!-- <i class="el-icon-user"></i> -->
           个人中心
         </router-link>
       </div>

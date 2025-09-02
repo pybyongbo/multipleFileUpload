@@ -77,4 +77,8 @@ router.get('/getFileType', fileController.getFileTypeList);
 router.get('/getUploadFileCount', fileController.getUploadFileCount);
 
 
+// 下载文件接口 - 通过文件ID下载
+router.get('/download/:fileId', fileController.downloadFile);
+
+
 module.exports = router;

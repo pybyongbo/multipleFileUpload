@@ -137,3 +137,19 @@ export const clearDir = () => {
 export const getFileTypeList = () => {
   return http.get('/getFileType')
 }
+
+
+
+// 下载文件到本地
+export const downloadFileById = (fileId,fileName='',{headers}) => {
+  // console.log('headers',headers);
+   return service.get(`/download/${fileId}`, {
+    responseType: "blob",
+    headers: {
+      ...headers
+    }
+  }).then(res =>{
+    console.log('res',res);
+    return res.data;
+  });
+};

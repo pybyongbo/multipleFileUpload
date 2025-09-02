@@ -168,9 +168,6 @@ exports.getUploadFileCount = async (ctx) => {
 }
 
 
-
-
-
 // 查询当前用户上传的文件(分页加载)
 
 exports.getFileListByUserId = async (ctx) => {
@@ -713,9 +710,122 @@ exports.completeDeleteFile = async (ctx) => {
 exports.getFileTypeList = async (ctx) => {
   const result = await fileModel.queryFileType();
   ctx.body = resObj(200, result, '查询文件的类型成功');
-  // ctx.body = {
-  //   success: true,
-  //   code: 200,
-  //   data: result,
-  // };
+
+};
+
+
+// 下载文件接口
+// 下载文件接口
+exports.downloadFile = async (ctx) => {
+  try {
+    const { fileId } = ctx.params;
+    const userId = ctx.state.user.id; // 从JWT token中获取用户ID
+    
+    // 查询文件信息
+    const fileResult = await fileModel.getFileById(fileId);
+
+    console.log('fileResult', fileResult);
+    
+    if (!fileResult || fileResult.length === 0) {
+      ctx.status = 404;
+      ctx.body = {
+        code: 404,
+        message: '文件不存在'
+      };
+      return;
+    }
+    
+    const file = fileResult[0];
+    
+    // 验证文件是否属于当前用户
+    if (file.uploader_id !== userId) {
+      ctx.status = 403;
+      ctx.body = {
+        code: 403,
+        message: '无权限访问该文件'
+      };
+      return;
+    }
+    
+    // 检查文件是否存在
+    // 修复文件路径，确保使用正确的上传目录
+    const filePath = path.join(uploadDir, path.basename(file.file_path));
+    console.log('filePath', filePath);
+    
+    try {
+      // 使用 fs.promises.access 异步检查文件是否存在
+      await fs.promises.access(filePath, fs.constants.F_OK);
+    } catch (accessError) {
+      console.error('文件访问错误:', accessError);
+      ctx.status = 404;
+      ctx.body = {
+        code: 404,
+        message: '文件在服务器上不存在'
+      };
+      return;
+    }
+    
+    // 检查文件是否可读
+    try {
+      await fs.promises.access(filePath, fs.constants.R_OK);
+    } catch (readError) {
+      console.error('文件读取权限错误:', readError);
+      ctx.status = 403;
+      ctx.body = {
+        code: 403,
+        message: '文件无读取权限'
+      };
+      return;
+    }
+    
+    // 获取文件统计信息
+    let fileStats;
+    try {
+      fileStats = await fs.promises.stat(filePath);
+    } catch (statError) {
+      console.error('获取文件信息错误:', statError);
+      ctx.status = 500;
+      ctx.body = {
+        code: 500,
+        message: '无法获取文件信息'
+      };
+      return;
+    }
+    
+    // 设置下载响应头
+    ctx.set('Content-Type', file.mime_type || 'application/octet-stream');
+    ctx.set('Content-Disposition', `attachment; filename="${encodeURIComponent(file.original_name || file.file_name)}"`);
+    ctx.set('Content-Length', fileStats.size);
+    
+    // 可选：添加缓存控制头
+    ctx.set('Cache-Control', 'public, max-age=31536000');
+    
+    // 创建文件读取流并pipe到响应
+    const fileStream = fs.createReadStream(filePath);
+    
+    // 监听流错误
+    fileStream.on('error', (streamError) => {
+      console.error('文件流错误:', streamError);
+      if (!ctx.headerSent) {
+        ctx.status = 500;
+        ctx.body = {
+          code: 500,
+          message: '文件读取错误'
+        };
+      }
+    });
+    
+    ctx.body = fileStream;
+    
+  } catch (error) {
+    console.error('文件下载错误:', error);
+    // 检查是否已经发送了响应头
+    if (!ctx.headerSent) {
+      ctx.status = 500;
+      ctx.body = {
+        code: 500,
+        message: '服务器内部错误'
+      };
+    }
+  }
 };

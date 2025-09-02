@@ -16,6 +16,9 @@ import Personal from '../src/views/personal.vue';
 // 大文件分片上传
 import UploadfileChunk from '@/views/uploadfileChunk.vue';
 
+// 大文件分片上传
+import DownloadFileList from '@/views/downloadlist.vue';
+
 const routes = [
   {
     path: '/login',
@@ -68,6 +71,16 @@ const routes = [
         component: UploadfileChunk,
         meta: { 
           title: '大文件分片上传',
+          requiresAuth: true 
+        }
+      },
+
+      {
+        path: '/downloadlist',
+        name: 'downloadlist',
+        component: DownloadFileList,
+        meta: { 
+          title: '接口下载文件',
           requiresAuth: true 
         }
       },
