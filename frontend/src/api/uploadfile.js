@@ -71,6 +71,18 @@ export const getFile = url =>{
 // 	});
 };
 
+
+// 更灵活的 POST 下载实现
+export const getFileByPost = (params, config = {}) => {
+  return service.post('/getFile', params, {
+    responseType: "blob",
+    ...config // 合并额外配置
+  }).then(res => {
+    console.log('res', res);
+    return res.data;
+  });
+};
+
 // 还原文件
 export const restoreFileById = (fileId) => {
   return http.get(`/restoreFile/${fileId}`);

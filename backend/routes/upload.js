@@ -81,4 +81,8 @@ router.get('/getUploadFileCount', fileController.getUploadFileCount);
 router.get('/download/:fileId', fileController.downloadFile);
 
 
+// post下载 (测试)
+router.post('/getFile', fileController.getFileByPost);
+
+
 module.exports = router;

@@ -95,7 +95,7 @@
         <el-card class="file-box-card">
           <template #header>
             <div class="clearfix hd-title">
-              <span class="manage-center">文件下载中心 (提供后端接口下载)</span>
+              <span class="manage-center-downloadlist">文件下载中心 (提供后端接口下载)</span>
 
               <div class="batch-btn-group">
                 <!--
@@ -763,14 +763,31 @@ const downloadFileToLocal = async (fileId, fileName) => {
 
 
 .card-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 10px;
+  
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 每行5个元素 */
+  gap: 16px;
+  
+  /* 响应式处理 */
+  @media (max-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr); /* 1400px以下每行4个 */
+  }
+  
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr); /* 1200px以下每行3个 */
+  }
+  
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, 1fr); /* 992px以下每行2个 */
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr; /* 768px以下每行1个 */
+  }
 
   .el-card {
     height: 300px;
-    width: 266px;
+    min-width: 0; /* 防止内容溢出 */
   }
 
   :deep(.el-card__header) {

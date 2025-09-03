@@ -189,7 +189,7 @@
                   </template>
                 </el-table-column> -->
 
-                <el-table-column label="文件名称" align="center" >
+                <el-table-column label="文件名称" width="260" align="center" >
                   <template #default="scope">
                     <div class="file-link11">
                       <el-tooltip :content="scope.row.file_name" placement="top"
@@ -239,10 +239,10 @@
                   </template>
                 </el-table-column>
 
-                <el-table-column label="操作" width="120" align="center">
+                <el-table-column label="操作" width="150" align="center">
                   <template #default="scope">
                     <div class="action-buttons">
-                      <el-tooltip content="下载" placement="top">
+                      <el-tooltip content="GET方式下载" placement="top">
                         <el-button link type="primary" icon="Download" @click="singleFileDownload(scope.row)"></el-button>
                       </el-tooltip><el-divider direction="vertical" />
                       <el-tooltip content="预览" placement="top">
@@ -251,6 +251,9 @@
                       </el-tooltip><el-divider direction="vertical" v-show="isImage(scope.row.file_name)"/>
                       <el-tooltip content="删除" placement="top">
                         <el-button link type="primary" icon="Delete" @click="deleteSingleFile(scope.row, index)"></el-button>
+                      </el-tooltip>
+                       <el-tooltip content="POST方式下载" placement="top">
+                        <el-button link type="primary" icon="Download" @click="singleDownloadFilePost(scope.row)"></el-button>
                       </el-tooltip>
                     </div>
                   </template>
@@ -283,7 +286,7 @@
                     </div>
                   </template>
                 </el-table-column>
-                <el-table-column  label="文件全地址" align="center" >
+                <el-table-column  label="文件全地址" width="260" align="center" >
                    <template #default="scope">
                     <div class="file-link-full-path11">
                       <el-tooltip :content="scope.row.full_path" placement="top"
@@ -393,13 +396,15 @@ import {
   getCarouselData,
   deleteUploadFile,
   batchDeleteFile,
-  getFile ,
+  getFile,
+  getFileByPost,
   restoreFileById,
   getOtherFileListTop5,
   completeDeleteFile
 } from "@/api/uploadfile";
 
 import {  updateUserEmail, getUserInfo } from "@/api/user";
+import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -948,6 +953,33 @@ const singleFileDownload = async (item) => {
     ElMessage.error('下载失败');
   }
 }
+
+
+// 点击单个文件,post方式下载
+const singleDownloadFilePost = async (item) => { 
+
+  const { file_name ,file_path,mime_type,original_name,uploader_id,...rest } = item;
+  // 单个文件,点击icon下载
+  try {
+    const res = await getFileByPost({
+      file_name,
+      file_path,
+      mime_type,
+      original_name,
+      uploader_id
+    },{
+        headers:{
+          Authorization: `Bearer ${getToken()}`
+        },
+      });
+    saveAs(res, item.file_name);
+    ElMessage.success('下载成功');
+  } catch (error) {
+    console.error('下载失败:', error);
+    ElMessage.error('下载失败');
+  }
+};
+
 
 // 还原文件 
 const restoreFile = async (item) => {
