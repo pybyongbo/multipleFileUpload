@@ -189,7 +189,7 @@
                   </template>
                 </el-table-column> -->
 
-                <el-table-column label="文件名称" width="260" align="center" >
+                <el-table-column label="文件名称" :min-width="260" align="center" >
                   <template #default="scope">
                     <div class="file-link11">
                       <el-tooltip :content="scope.row.file_name" placement="top"
@@ -286,7 +286,7 @@
                     </div>
                   </template>
                 </el-table-column>
-                <el-table-column  label="文件全地址" width="260" align="center" >
+                <el-table-column  label="文件全地址" :min-width="260" align="center" >
                    <template #default="scope">
                     <div class="file-link-full-path11">
                       <el-tooltip :content="scope.row.full_path" placement="top"
