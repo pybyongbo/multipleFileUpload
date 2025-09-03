@@ -99,7 +99,7 @@
               <span class="manage-center">管理中心</span>
               <div class="searchForm">
                <el-form ref="searchFormRef" :model="searchForm" :inline="true" label-width="80px">
-                  <el-form-item label="文件名">
+                  <el-form-item label="文件名" class="file-name-label">
                     <el-input v-model="searchForm.fileName" placeholder="请输入文件名"></el-input>
                   </el-form-item>
                  <el-form-item label="文件类型">
@@ -1223,6 +1223,8 @@ const completeDelete = async (item) => {
     margin-right:5px;
     flex-shrink: 0
    }
+
+  
 }
 
 .file-box-card {
@@ -1378,9 +1380,12 @@ const completeDelete = async (item) => {
   .hd-title{
     span.manage-center{
       display: none;
-
     }
   }
+   .file-name-label :deep(.el-form-item__label){
+    width:70px!important;
+    //display1: none;
+   }
  }
 
 </style>

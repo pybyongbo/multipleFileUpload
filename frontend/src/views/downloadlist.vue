@@ -95,10 +95,10 @@
         <el-card class="file-box-card">
           <template #header>
             <div class="clearfix hd-title">
-              <span class="manage-center">文件下载中心 (后端接口提供下载)</span>
+              <span class="manage-center">文件下载中心 (提供后端接口下载)</span>
 
               <div class="batch-btn-group">
-                  <!--
+                <!--
                   <el-button type="primary" size="small" @click="showMode='list'" ><el-icon>
                       <List />
                     </el-icon>列表模式</el-button>
@@ -146,7 +146,7 @@
                   </span>
                 </div>
 
-                <el-popover placement="right" :width="400" trigger="click">
+                <el-popover placement="right" :width="400" :teleported="false" transition="abc" trigger="click">
                   <template #reference>
                     <el-button type="primary" link>{{ file.file_name }}</el-button>
                   </template>
@@ -749,6 +749,10 @@ const downloadFileToLocal = async (fileId, fileName) => {
         font-size: 12px;
       }
 
+      .el-tag{
+        font-size:12px;
+      }
+
       button {
         font-size: 12px;
       }
@@ -837,8 +841,6 @@ const downloadFileToLocal = async (fileId, fileName) => {
   }
 }
 
-
-
 .file-link-type {
 
   padding-right: 20px;
@@ -895,6 +897,18 @@ const downloadFileToLocal = async (fileId, fileName) => {
   span.manage-center {
     margin-top: -8px;
   }
+}
+
+:deep(.abc-enter-active), :deep(.abc-leave-active) {
+  transition: all .3s;
+}
+:deep(.abc-enter-from), :deep(.abc-leave-to) {
+  opacity: 0;
+  transform: translate(-50px, -50px) scale(0.3);
+}
+:deep(.abc-enter-to), :deep(.abc-leave-from) {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
 }
 
 @media screen and (max-width: 1500px) {
