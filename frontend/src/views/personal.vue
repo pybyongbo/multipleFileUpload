@@ -985,9 +985,11 @@ const singleDownloadFilePost = async (item) => {
 const restoreFile = async (item) => {
   try {
     const res = await restoreFileById(item.id);
+
+    const {code,message} = res;
     
-    if (res.success) {
-      ElMessage.success(res.msg || '文件还原成功');
+    if (code===200) {
+      ElMessage.success(message || '文件还原成功');
       // 重新请求已删除的文件列表以更新当前视图
       await getFileListDeleted(pageDeleted.value);
       
@@ -1000,7 +1002,7 @@ const restoreFile = async (item) => {
         console.error('更新活动文件总数失败:', error);
       }
     } else {
-      ElMessage.error(res.msg || '文件还原失败');
+      ElMessage.error(message || '文件还原失败');
     }
   } catch (error) {
     console.error('还原文件失败:', error);
