@@ -15,7 +15,7 @@ var resObj = (code,data,msg,) => {
   return {
     code: code,
     data: data,
-    msg: msg,
+    message: msg,
   };
 };
 
@@ -934,6 +934,26 @@ exports.getFileByPost = async (ctx) => {
       };
     }
   }
+};
 
+// 更新图片描述内容
 
+exports.updateFileDescription = async (ctx) => {
+  const { id, description } = ctx.request.body;
+  if (!id) {
+    ctx.body = resObj(400, null, '文件ID不能为空');
+    return;
+  }
+  
+  try {
+    const result = await fileModel.updateFileDescription(id, description);
+    if (result.affectedRows > 0) {
+        ctx.body = resObj(200, null, '文件描述更新成功');
+    } else {
+        ctx.body = resObj(500, null, '文件描述更新失败');
+    }
+  } catch (error) {
+    console.error('更新文件描述失败:', error);
+    ctx.body = resObj(500, null, '文件描述更新失败');
+  }
 };

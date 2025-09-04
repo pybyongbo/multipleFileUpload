@@ -416,7 +416,6 @@ exports.getOtherFileListPicTop5 = async (userId) => {
 
 // 彻底删除文件
 exports.completeDeleteFile = async (userId,filepath) => {
-  // console.log('彻底删除',filepath);
   // console.log(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
   return query(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
 }
@@ -432,4 +431,11 @@ exports.queryFileType = async () => {
 exports.getFileById = (fileId) => {
   let _sql = `SELECT * FROM files WHERE id = ? AND status != 'deleted'`;
   return query(_sql, [fileId]);
+};
+
+// 更新文件描述内容
+
+exports.updateFileDescription = (fileId, description) => {
+  let _sql = `UPDATE files SET description = ? WHERE id = ?`;
+  return query(_sql, [description, fileId]);
 };

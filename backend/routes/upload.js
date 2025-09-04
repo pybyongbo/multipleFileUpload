@@ -85,4 +85,8 @@ router.get('/download/:fileId', fileController.downloadFile);
 router.post('/getFile', fileController.getFileByPost);
 
 
+// 更新图片描述内容
+router.post('/updateFileDescription', fileController.updateFileDescription);
+
+
 module.exports = router;

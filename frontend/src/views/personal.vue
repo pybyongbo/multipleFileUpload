@@ -48,7 +48,7 @@
             <div v-if="carouselData.length>0">
               <Carousel ref="carouselRef" @change="handleChange" :imgs="carouselData" :autoPlay="true"></Carousel>
               <div class="current">
-                <el-button type="primary"  @click="$event=>change(currentIndex-1)" :disabled="currentIndex===0">
+                <el-button type="primary" @click="$event=>change(currentIndex-1)" :disabled="currentIndex===0">
                   &lt;
                 </el-button>
                 <span class="num">第{{currentIndex+1}}张</span>
@@ -189,7 +189,7 @@
                   </template>
                 </el-table-column> -->
 
-                <el-table-column label="文件名称" :min-width="260" align="center" >
+                <el-table-column label="文件名称" :min-width="240" align="center" >
                   <template #default="scope">
                     <div class="file-link11">
                       <el-tooltip :content="scope.row.file_name" placement="top"
@@ -199,6 +199,35 @@
                     </div>
                   </template>
                 </el-table-column>
+
+                 <el-table-column label="文件描述" :min-width="240" align="center" >
+                  <template #default="scope">
+                      <template v-if="scope.row.edit">
+                        <el-input v-model="scope.row.description" class="edit-input" size="small" />
+                        <div style="margin-top:5px;">
+                          <el-button
+                          class="cancel-btn"
+                          size="small"
+                          type="warning"
+                          @click="cancelEdit(scope.row)"
+                        >
+                          cancel
+                        </el-button>
+                         <el-button
+                          class="cancel-btn"
+                          size="small"
+                          type="primary"
+                          @click="saveEdit(scope.row,scope.row.description)"
+                        >
+                          save
+                        </el-button>
+                        </div>
+                      
+                      </template>
+                      <span v-else>{{ scope.row.description ||'--' }}</span>
+                    </template>
+                </el-table-column>
+
                 <el-table-column prop="file_size" label="文件大小(KB)" width="180" align="center">
                    <template #default="scope">
                     {{ bytesToKB(+scope?.row.file_size) }}
@@ -235,11 +264,11 @@
                 </el-table-column>
                 <el-table-column prop="upload_time" label="上传时间" width="180" align="center">
                   <template #default="scope">
-                    {{ dayjs(scope.row.upload_time).format('YYYY-MM-DD HH:mm:ss') }}
+                    {{ dayjs(scope.row.upload_time).format('YYYY/MM/DD HH:mm:ss') }}
                   </template>
                 </el-table-column>
 
-                <el-table-column label="操作" width="150" align="center">
+                <el-table-column label="操作" width="150" align="center" fixed="right">
                   <template #default="scope">
                     <div class="action-buttons">
                       <el-tooltip content="GET方式下载" placement="top">
@@ -249,12 +278,26 @@
                         <el-button link type="primary" icon="View" @click="previewImage(scope.row.full_path)"
                           v-show="isImage(scope.row.file_name)"></el-button>
                       </el-tooltip><el-divider direction="vertical" v-show="isImage(scope.row.file_name)"/>
-                      <el-tooltip content="删除" placement="top">
+
+                      <el-tooltip content="更多" placement="top">
+                        <el-dropdown trigger="hover">
+                          <el-button link type="primary" icon="More" />
+                          <template #dropdown>
+                            <el-dropdown-menu>
+                              <el-dropdown-item @click="handleEditDescription(scope.row)">编辑</el-dropdown-item>
+                              <el-dropdown-item @click="singleDownloadFilePost(scope.row)">下载</el-dropdown-item>
+                              <el-dropdown-item @click="deleteSingleFile(scope.row, index)">删除</el-dropdown-item>
+                            </el-dropdown-menu>
+                          </template>
+                          </el-dropdown>
+                      </el-tooltip>
+                      <!--
+                       <el-tooltip content="删除" placement="top">
                         <el-button link type="primary" icon="Delete" @click="deleteSingleFile(scope.row, index)"></el-button>
                       </el-tooltip>
                        <el-tooltip content="POST方式下载" placement="top">
                         <el-button link type="primary" icon="Download" @click="singleDownloadFilePost(scope.row)"></el-button>
-                      </el-tooltip>
+                      </el-tooltip> -->
                     </div>
                   </template>
                 </el-table-column>
@@ -390,7 +433,6 @@ import { isImage,bytesToKB,getMimeTypeCategory,formatDateRange,getFileExtension 
 import { scrollTo } from '@/utils/scroll-to.js';
 import {mimeTypeMap} from '@/utils/constant.js';
 import { 
-
   getFileListByUserId, 
   getFileListDeletedByUserId,
   getCarouselData,
@@ -400,7 +442,9 @@ import {
   getFileByPost,
   restoreFileById,
   getOtherFileListTop5,
-  completeDeleteFile
+  completeDeleteFile,
+  updateFileDescription
+  
 } from "@/api/uploadfile";
 
 import {  updateUserEmail, getUserInfo } from "@/api/user";
@@ -954,6 +998,41 @@ const singleFileDownload = async (item) => {
   }
 }
 
+// 编辑描述
+
+const handleEditDescription = (item) => { 
+  console.log('编辑描述',item);
+  item.edit = true;
+}
+
+
+const cancelEdit = (item) => { 
+  item.edit = false;
+  // 如果需要，可以在这里恢复原始描述
+  // item.description = originalDescription; // 假设 originalDescription 是原始描述 
+}
+
+const saveEdit =async (item,value) => { 
+  item.edit = false;
+  console.log('value',value);
+  // 调用API保存描述
+  const res = await updateFileDescription({id:item.id,description:value});
+  const {code,message} = res;
+  console.log("res111",res);
+  if(code === 200) {
+    ElMessage.success(message || '描述更新成功');
+    getFileList({
+       page: pageActive.value,
+      ...searchForm
+    });
+  } else {
+    ElMessage.error(message || '描述更新失败');
+    getFileList({
+       page: pageActive.value,
+      ...searchForm
+    });
+}
+}
 
 // 点击单个文件,post方式下载
 const singleDownloadFilePost = async (item) => { 
@@ -1292,7 +1371,52 @@ const completeDelete = async (item) => {
  
 }
 
+/* 文件链接容器样式 */
+.file-link11,
+.file-link-full-path11 {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+  position: relative;
+}
 
+/* 文件路径文本样式 */
+.file-path-text {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 编辑输入框样式 */
+.edit-input {
+  width: 100%;
+}
+
+/* 取消按钮样式 */
+.cancel-btn {
+  margin-left: 5px;
+  margin-top: 5px;
+}
+
+/* 修复复制链接的样式问题 */
+.file-link-full-path11 {
+  display: flex;
+  align-items: center;
+  
+  .file-path-text {
+    flex: 1;
+    min-width: 0; /* 允许文本收缩 */
+  }
+  
+  .el-link {
+    flex-shrink: 0;
+    margin-left: 10px;
+  }
+}
 
 
 // 缩略图容器样式

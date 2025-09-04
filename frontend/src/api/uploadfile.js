@@ -165,3 +165,8 @@ export const downloadFileById = (fileId,fileName='',{headers}) => {
     return res.data;
   });
 };
+
+// 更新图片描述内容
+export const updateFileDescription = (params) => {
+  return http.post('/updateFileDescription', params);
+}
