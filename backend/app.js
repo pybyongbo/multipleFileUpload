@@ -37,7 +37,7 @@ app.use(ip({
 // 静态文件CORS处理中间件
 app.use(async (ctx, next) => {
   if (ctx.path.startsWith('/uploads/')) {
-    ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin)
+    ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin || '*')
     ctx.set('Access-Control-Allow-Credentials', 'true')
     if (ctx.method === 'OPTIONS') {
       ctx.status = 204
