@@ -1,44 +1,33 @@
 <template>
 
   <!-- <template v-for="option in fileTypeOptions" :key="option.value">
-                        <el-option
-                          v-if="!option.children"
-                          :label="option.label"
-                          :value="option.value"
-                        >
-                        </el-option>
-                        
-                        <el-option-group
-                          v-else
-                          :label="option.label"
-                        >
-                          <el-option
-                            v-for="child in option.children"
-                            :key="child.value"
-                            :label="child.label"
-                            :value="child.value"
-                          >
-                          </el-option>
-                        </el-option-group>
-                      </template> -->
-  <el-upload
-    class="upload-demo"
-    drag
-    ref="uploadRef"
-    action="http://localhost:3000/upload"
-    :multiple="true"
-    :limit="3"
-    :file-list="fileList"
-    :on-change="handleChange"
-    :on-exceed="handleExceed"
-    :on-remove="handleRemove"
-    :on-success="handleSuccess"
-    :on-error="handleError"
-    name="files"
-    :http-request="customUploadRequest"
-    list-type="text"
-  >
-    <el-icon><UploadFilled /></el-icon>
+    <el-option
+      v-if="!option.children"
+      :label="option.label"
+      :value="option.value"
+    >
+    </el-option>
+    
+    <el-option-group
+      v-else
+      :label="option.label"
+    >
+      <el-option
+        v-for="child in option.children"
+        :key="child.value"
+        :label="child.label"
+        :value="child.value"
+      >
+      </el-option>
+    </el-option-group>
+  </template> -->
+  <el-upload class="upload-demo" drag ref="uploadRef" action="http://localhost:3000/upload" :multiple="true" :limit="3"
+    :file-list="fileList" :on-change="handleChange" :on-exceed="handleExceed" :on-remove="handleRemove"
+    :on-success="handleSuccess" :on-error="handleError" name="files" :http-request="customUploadRequest"
+    list-type="text">
+    <el-icon>
+      <UploadFilled />
+    </el-icon>
     <div class="el-upload__text">拖拽上传或 <em>点击上传</em></div>
     <template #tip>
       <div class="el-upload__tip">最多上传 3 个文件，支持多种类型</div>
@@ -51,30 +40,22 @@
       <li v-for="(file, index) in previews" :key="index" class="list-item">
         <template v-if="file.mimetype.startsWith('image/')">
           <!-- 点击时只预览当前图片 -->
-          <img :src="file.path" :alt="file.originalName" @click="previewImage(index)" style="max-width: 200px; margin-bottom: 10px; cursor: pointer;" />
+          <img :src="file.path" :alt="file.originalName" @click="previewImage(index)"
+            style="max-width: 200px; margin-bottom: 10px; cursor: pointer;" />
         </template>
         <template v-else>
           <a :href="file.path" target="_blank">{{ file.originalName }}</a>
         </template>
-        <el-button
-          size="small"
-          type="danger"
-          @click="deleteFile(file, index)"
-        >
+        <el-button size="small" type="danger" @click="deleteFile(file, index)">
           删除
         </el-button>
       </li>
     </ul>
   </div>
-  
+
   <!-- 修改图片预览组件，支持初始索引 -->
-  <el-image-viewer
-    v-if="showPreview"
-    :url-list="previews.map(item => item.path)"
-    :initial-index="previewIndex"
-    show-progress
-    @close="showPreview = false"
-  />
+  <el-image-viewer v-if="showPreview" :url-list="previews.map(item => item.path)" :initial-index="previewIndex"
+    show-progress @close="showPreview = false" />
 </template>
 
 <script setup>
@@ -178,21 +159,22 @@ const deleteFile = async (file, index) => {
 </script>
 
 <style scoped lang="scss">
-.upload-demo{
+.upload-demo {
   margin: 20px auto;
-  width:480px;
+  width: 480px;
 }
 
-.preview{
-   ul{
+.preview {
+  ul {
     display: flex;
     list-style-type: none;
-    gap:20px;
-    li.list-item{
+    gap: 20px;
+
+    li.list-item {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-   }
+  }
 }
 </style>
