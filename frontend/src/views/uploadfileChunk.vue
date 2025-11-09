@@ -511,8 +511,8 @@ const formatFinishTime = (timestamp) => {
   max-width: 1000px;
   margin: 0 auto;
   overflow-y: auto;
-  min-height: calc(100vh - 220px);
-  max-height: calc(100vh - 220px);
+  min-height: calc(100vh - 320px);
+  max-height: calc(100vh - 320px);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);

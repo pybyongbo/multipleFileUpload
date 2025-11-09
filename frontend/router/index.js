@@ -11,13 +11,16 @@ import UploadfileBinary from '@/views/uploadfileBinary.vue';
 
 import Login from '@/views/login.vue';
 import Register from '@/views/register.vue';
-import Personal from '../src/views/personal.vue';
+import FileList from '../src/views/fileList.vue';
 
 // 大文件分片上传
 import UploadfileChunk from '@/views/uploadfileChunk.vue';
 
 // 大文件分片上传
 import DownloadFileList from '@/views/downloadlist.vue';
+
+// 个人中心
+import UserCenter from '@/views/userCenter.vue';
 
 const routes = [
   {
@@ -76,7 +79,7 @@ const routes = [
       },
 
       {
-        path: '/downloadlist',
+        path: '/downloadList',
         name: 'downloadlist',
         component: DownloadFileList,
         meta: { 
@@ -85,9 +88,17 @@ const routes = [
         }
       },
       {
-        path: '/personal',
-        name: 'personal',
-        component: Personal,
+        path: '/fileList',
+        name: 'fileList',
+        component: FileList,
+        meta: { 
+          title: '文件列表',
+          requiresAuth: true 
+        }
+      },{
+        path: '/userCenter',
+        name: 'userCenter',
+        component: UserCenter,
         meta: { 
           title: '个人中心',
           requiresAuth: true 

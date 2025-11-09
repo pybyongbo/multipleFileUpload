@@ -14,17 +14,17 @@
               <ul class="list-group list-group-striped">
                 <li class="list-group-item">
                   <svg-icon icon-class="user" />用户名称
-                  <div class="pull-right">{{ userStore.name }}</div>
+                  <div class="pull-right">{{ userStore.userInfo.username }}</div>
                 </li>
                 <li class="list-group-item">
                   <svg-icon icon-class="email" />用户邮箱
-                  <div class="pull-right" v-if="userStore.email">{{ userStore.email }}</div>
+                  <div class="pull-right" v-if="userStore.userInfo.email">{{ userStore.userInfo.email }}</div>
                   <div class="pull-right no-email" v-else><span style="vertical-align: -1px;">未填写</span> <el-button link
                       type="primary" size="small" @click="upDateEmailInfo">更新</el-button></div>
                 </li>
                 <li class="list-group-item">
                   <svg-icon icon-class="date" />用户注册时间
-                  <div class="pull-right">{{ dayjs(userStore.created_at).format('YYYY-MM-DD HH:mm:ss') }} </div>
+                  <div class="pull-right">{{ dayjs(userStore.userInfo.created_at).format('YYYY-MM-DD HH:mm:ss') }} </div>
                 </li>
                 <li class="list-group-item">
                   <svg-icon icon-class="time" />最后登录时间
@@ -33,7 +33,7 @@
 
                 <li class="list-group-item">
                   <svg-icon icon-class="online" />最后登录IP地址
-                  <div class="pull-right">{{ userStore.login_ip }}</div>
+                  <div class="pull-right">{{ userStore.userInfo.login_ip }}</div>
                 </li>
               </ul>
             </div>

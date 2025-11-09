@@ -19,6 +19,14 @@ router.post('/logout', userController.userLogout);
 // 更新用户邮箱信息
 router.post('/updateEmail', userController.updateEmail);
 
+
+// 用户头像上传
+router.post('/uploadAvatar', userController.uploadAvatar);
+
+
+// 更新用户基本信息
+router.post('/updateUserInfo', userController.updateUserInfo);
+
 // router.get('/', function (ctx, next) {
 //   ctx.body = 'this is a users response!'
 // })

@@ -51,3 +51,18 @@ exports.updateUserEmail = (id, email) => {
   let _sql = `UPDATE users SET email = ? WHERE id = ?`;
   return query(_sql, [email, id]);
 }
+
+// 用户上传头像
+exports.updateUserAvatar = (id, avatar) => {
+  let _sql = `UPDATE users SET avatar = ? WHERE id = ?`;
+  return query(_sql, [avatar, id]);
+}
+
+// 更新用户信息
+exports.updateUserInfo = (id, nickname, phonenumber, gender) => {
+
+  // userId, username, nickname, phonenumber, gender
+  let _sql = `UPDATE users SET nickname = ?, phonenumber = ?, gender = ? WHERE id = ?`;
+  console.log('_sql',_sql);
+  return query(_sql, [nickname, phonenumber, gender, id]);
+}

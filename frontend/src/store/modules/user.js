@@ -10,13 +10,15 @@ const useUserStore = defineStore(
   'user',
   {
     state: () => ({
-      token: getToken(),
-      id: '',
-      name: '',
-      email: '',
-      created_at: '',
-      last_login: '',
-      login_ip: '',
+      userInfo:{
+        token: getToken(),
+        id: '',
+        name: '',
+        email: '',
+        created_at: '',
+        last_login: '',
+        login_ip: '',
+      }
     }),
     actions: {
       // 登录
@@ -48,14 +50,15 @@ const useUserStore = defineStore(
       getInfo() {
         return new Promise((resolve, reject) => {
           getUserInfo().then(res => {
-            console.log('res666',res);
             const user = res.data
-            this.id = user.id
-            this.name = user.username
-            this.email = user.email
-            this.created_at = user.created_at
-            this.last_login = user.last_login
-            this.login_ip = user.login_ip
+            // this.id = user.id
+            // this.name = user.username
+            // this.email = user.email
+            // this.avatar = user.avatar
+            // this.created_at = user.created_at
+            // this.last_login = user.last_login
+            // this.login_ip = user.login_ip
+            this.userInfo = { ...this.userInfo, ...user }
           
             resolve(res.data)
           }).catch(error => {
@@ -75,7 +78,10 @@ const useUserStore = defineStore(
             reject(error)
           })
         })
-      }
+      },
+      setUserInfo(userInfo) {
+      this.userInfo = { ...this.userInfo, ...userInfo }
+    },
     }
   })
 
