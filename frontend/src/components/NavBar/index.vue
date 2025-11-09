@@ -1,10 +1,10 @@
 <script setup>
 import { ref } from 'vue'
-import {ElMessageBox, ElMessage} from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import useUserStore from '@/store/modules/user'
 const userStore = useUserStore()
 
-console.log('userStore', userStore);
+// console.log('userStore', userStore);
 userStore.getInfo().then(res => {
   console.log('6655', res);
 
@@ -50,10 +50,10 @@ function handleCommand(command) {
       <div class="nav-menu">
         <router-link to="/uploadfile" class="nav-link">
           首页
-        </router-link> 
+        </router-link>
         <router-link to="/uploadfileBase64" class="nav-link">
           Base64上传
-        </router-link> 
+        </router-link>
         <router-link to="/uploadfileBinary" class="nav-link">
           二进制上传
         </router-link>
@@ -61,30 +61,30 @@ function handleCommand(command) {
           大文件分片上传
         </router-link>
 
-         <router-link to="/downloadlist" class="nav-link">
+        <router-link to="/downloadList" class="nav-link">
           接口下载文件
         </router-link>
 
-        <router-link to="/personal" class="nav-link">
-          个人中心
+        <router-link to="/fileList" class="nav-link">
+          文件列表
         </router-link>
       </div>
     </div>
-   
+
     <el-dropdown @command="handleCommand" class="avatar-container" trigger="hover">
       <div class="avatar-wrapper">
         <span class="user-nickname">
           <!-- <el-avatar size="small" icon="el-icon-user" class="user-avatar" /> -->
-           <el-avatar style="width:24px;height:24px;vertical-align: -4px;margin-right:3px;">
-        <svg-icon icon-class="user"  class="el-input__icon input-icon" />
-      </el-avatar>
-          {{ userStore.name }} 
+          <el-avatar style="width:24px;height:24px;vertical-align: -4px;margin-right:3px;">
+            <svg-icon icon-class="user" class="el-input__icon input-icon" />
+          </el-avatar>
+          {{ userStore.userInfo.username }}
           <i class="el-icon-arrow-down"></i>
         </span>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
-          <router-link to="/personal">
+          <router-link to="/userCenter">
             <el-dropdown-item>
               <i class="el-icon-user"></i>
               个人中心
@@ -101,7 +101,6 @@ function handleCommand(command) {
 </template>
 
 <style lang="scss" scoped>
-
 .nav-wrapper {
   display: flex;
   justify-content: space-between;
@@ -112,18 +111,21 @@ function handleCommand(command) {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   padding: 0 20px;
   box-sizing: border-box;
-  position: fixed; /* 固定定位 */
+  position: fixed;
+  /* 固定定位 */
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000; /* 确保在最上层 */
+  z-index: 1000;
+  /* 确保在最上层 */
 
   .nav-left {
     display: flex;
     align-items: center;
-    
+
     .logo {
       margin-right: 30px;
+
       h1 {
         font-size: 22px;
         font-weight: 600;
@@ -132,12 +134,12 @@ function handleCommand(command) {
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       }
     }
-    
+
     .nav-menu {
       display: flex;
       align-items: center;
       gap: 5px;
-      
+
       .nav-link {
         padding: 8px 16px;
         margin: 0 8px;
@@ -150,20 +152,20 @@ function handleCommand(command) {
         display: flex;
         align-items: center;
         gap: 6px;
-        
+
         &:hover {
           background: rgba(255, 255, 255, 0.1);
           color: white;
           transform: translateY(-1px);
         }
-        
+
         &.router-link-active {
           background: rgba(255, 255, 255, 0.2);
           color: white;
           font-weight: 600;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
-        
+
         i {
           font-size: 16px;
         }
@@ -177,24 +179,24 @@ function handleCommand(command) {
     display: flex;
     align-items: center;
     cursor: pointer;
-    
+
     .user-avatar {
       margin-right: 10px;
     }
-    
+
     .user-nickname {
       color: white;
       font-weight: 500;
       display: flex;
       align-items: center;
       gap: 5px;
-      
+
       i {
         font-size: 12px;
         transition: transform 0.3s ease;
       }
     }
-    
+
     &:hover {
       .user-nickname i {
         transform: rotate(180deg);
@@ -209,19 +211,19 @@ function handleCommand(command) {
     flex-direction: column;
     height: auto;
     padding: 10px;
-    
+
     .nav-left {
       flex-direction: column;
       width: 100%;
-      
+
       .logo {
         margin: 10px 0;
       }
-      
+
       .nav-menu {
         flex-wrap: wrap;
         justify-content: center;
-        
+
         .nav-link {
           margin: 5px;
           padding: 6px 12px;
@@ -231,6 +233,4 @@ function handleCommand(command) {
     }
   }
 }
-
-
 </style>

@@ -1,5 +1,7 @@
 const userModel = require('../lib/user.js');
 const config = require('../config/index.js');
+const path = require('path');
+const fs = require('fs');
 const md5 = require("md5");
 
 const jwt = require('jsonwebtoken');
@@ -238,9 +240,72 @@ exports.updateEmail = async ctx => {
     console.error(err);
     ctx.status = 500;
     ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+// 用户头像上传
+exports.uploadAvatar = async ctx => {
+  try {
+    const userId = ctx.state.user.id;
+    
+    // 检查是否有文件上传
+    if (!ctx.request.files || !ctx.request.files.avatarfile) {
+      ctx.status = 400;
+      ctx.body = resObj(400, null, '未找到上传的文件');
+      return;
+    }
+
+    const file = ctx.request.files.avatarfile;
+    
+    // 检查文件类型（可选但推荐）
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      ctx.status = 400;
+      ctx.body = resObj(400, null, '只允许上传 JPG/PNG/GIF 格式的图片');
+      return;
+    }
+
+    // 生成唯一的文件名
+    const ext = path.extname(file.originalFilename);
+    const basename = path.basename(file.originalFilename, ext);
+    const newName = `${basename}_${Date.now()}${ext}`;
+    const avatarPath = path.join(__dirname, '../public/uploads/avatars', newName);
+    
+    // 确保目标目录存在
+    const uploadDir = path.join(__dirname, '../public/uploads/avatars');
+    await fs.promises.mkdir(uploadDir, { recursive: true });
+    
+    // 移动文件到指定位置
+    await fs.promises.rename(file.filepath, avatarPath);
+
+    // 更新用户头像路径到数据库
+    const avatarUrl = `/uploads/avatars/${newName}`;
+    await userModel.updateUserAvatar(userId, avatarUrl);
+
+    ctx.body = resObj(200, { imgUrl: avatarUrl }, '头像上传成功');
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+// 更新用户基本信息
+
+exports.updateUserInfo = async ctx => {
+  try {
+    const id = ctx.state.user.id;
+    const {  nickname, phonenumber ,gender} = ctx.request.body;
+    await userModel.updateUserInfo( id, nickname, phonenumber, gender);
+    ctx.body = resObj(200, null, '更新用户信息成功');
     // ctx.body = {
-    //   code: 500,
-    //   message: '服务器内部错误'
+    //   code: 200,
+   //   message: '更新用户信息成功',
     // };
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
   }
 }

@@ -24,3 +24,19 @@ export const getUserInfo = () => {
 export const updateUserEmail = params => {
   return http.post('/updateEmail', params);
 }
+
+// 更新用户上传头像
+
+export const uploadAvatar = params => {
+  console.log('params',params);
+  return http.post('/uploadAvatar', params,{
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+}
+
+// 更新用户基本信息
+export const updateUserInfo = params => {
+  return http.post('/updateUserInfo', params);
+}
