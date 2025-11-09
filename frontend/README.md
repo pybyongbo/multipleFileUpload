@@ -21,4 +21,19 @@
 - [x] 最新上传非图片文件列表
 - [x] 接口支持不同类型的数据上传 (base64,二进制流等)
 
-- [ ] 文件列表接口合并,通过参数区分
+- [] 文件列表接口合并,通过参数区分
+
+
+### 数据库表新增字段sql语句
+
+```sql
+
+ALTER TABLE `users` ADD COLUMN `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户头像' AFTER `password`;
+ALTER TABLE `users` ADD COLUMN `nickname` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户昵称' AFTER `username`;
+ALTER TABLE `users` ADD COLUMN `phonenumber` varchar(11) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户手机号' AFTER `nickname`;
+ALTER TABLE `users` ADD COLUMN `gender` tinyint(1) DEFAULT 0 COMMENT '用户性别：0-保密，1-男性，2-女性' AFTER `phonenumber`;
+
+
+```
+
+
