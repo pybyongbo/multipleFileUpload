@@ -265,11 +265,8 @@ exports.getFileListDeletedByUserId = (userId, conditions = {}) => {
    // 添加排序和分页
   baseSql += ` ORDER BY delete_time DESC LIMIT ?, ?`;
   params.push((conditions.page - 1) * 10, 10);
-  console.log('123131',JSON.stringify(conditions));
-  console.log('baseSql111',baseSql);
+  // console.log('123131',JSON.stringify(conditions));
   return query(baseSql, params);
-
-
 
 }
 
@@ -416,7 +413,6 @@ exports.getOtherFileListPicTop5 = async (userId) => {
 
 // 彻底删除文件
 exports.completeDeleteFile = async (userId,filepath) => {
-  // console.log(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
   return query(`DELETE FROM files WHERE uploader_id = ${userId} AND file_path = '${filepath}'`);
 }
 

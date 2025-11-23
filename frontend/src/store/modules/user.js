@@ -15,6 +15,7 @@ const useUserStore = defineStore(
         id: '',
         name: '',
         email: '',
+        avatar: '',
         created_at: '',
         last_login: '',
         login_ip: '',

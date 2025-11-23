@@ -40,3 +40,8 @@ export const uploadAvatar = params => {
 export const updateUserInfo = params => {
   return http.post('/updateUserInfo', params);
 }
+
+// 更新用户密码 updateUserPassword
+export const updateUserPassword = params => {
+  return http.post('/updatePassword', params);
+}

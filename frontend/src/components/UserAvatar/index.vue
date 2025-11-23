@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { ElMessage } from "element-plus";
 import "vue-cropper/dist/index.css";
 import { VueCropper } from "vue-cropper";
@@ -94,6 +94,8 @@ onMounted(async () => {
   await loadUserInfo();
 });
 
+
+
 // 加载用户信息的独立函数
 async function loadUserInfo() {
   try {
@@ -101,10 +103,10 @@ async function loadUserInfo() {
     
     if (response.data.avatar) {
       // 添加时间戳避免缓存
-      const timestamp = new Date().getTime();
-      const fullAvatarUrl = BASE_URL + response.data.avatar + '?t=' + timestamp;
-      options.img = fullAvatarUrl;
-      userStore.avatar = fullAvatarUrl;
+      // const timestamp = new Date().getTime(); + '?t=' + timestamp
+      const fullAvatarUrl =  response.data.avatar ;
+      options.img = BASE_URL + fullAvatarUrl;
+      userStore.userInfo.avatar = fullAvatarUrl;
       console.log('设置头像URL:', fullAvatarUrl);
     } else {
       options.img = ''; // 默认头像
@@ -176,14 +178,16 @@ function uploadImg() {
       // 直接使用返回的新头像URL更新显示
       if (response.data.imgUrl) {
         // 添加时间戳避免浏览器缓存
-        const timestamp = new Date().getTime();
-        const fullAvatarUrl = BASE_URL + response.data.imgUrl + '?t=' + timestamp;
-        options.img = fullAvatarUrl;
-        userStore.avatar = fullAvatarUrl;
+        // const timestamp = new Date().getTime();
+        const fullAvatarUrl =  response.data.imgUrl ;
+        options.img =BASE_URL + fullAvatarUrl;
+        userStore.userInfo.avatar = fullAvatarUrl;
+
+        
        
         // 强制触发Vue的响应式更新
         setTimeout(() => {
-          options.img = fullAvatarUrl;
+          options.img =BASE_URL + fullAvatarUrl;
         }, 100);
       }
     }).catch(error => {

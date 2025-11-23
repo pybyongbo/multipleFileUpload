@@ -66,3 +66,10 @@ exports.updateUserInfo = (id, nickname, phonenumber, gender) => {
   console.log('_sql',_sql);
   return query(_sql, [nickname, phonenumber, gender, id]);
 }
+
+// 更新用户密码
+exports.updateUserPassword = (id, password) => {
+  let _sql = `UPDATE users SET password = ? WHERE id = ?`;
+  return query(_sql, [password, id]);
+
+}

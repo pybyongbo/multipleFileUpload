@@ -27,12 +27,9 @@ router.post('/uploadAvatar', userController.uploadAvatar);
 // 更新用户基本信息
 router.post('/updateUserInfo', userController.updateUserInfo);
 
-// router.get('/', function (ctx, next) {
-//   ctx.body = 'this is a users response!'
-// })
 
-// router.get('/bar', function (ctx, next) {
-//   ctx.body = 'this is a users/bar response'
-// })
+// 更新用户密码
+router.post('/updatePassword', userController.updatePassword);
+
 
 module.exports = router

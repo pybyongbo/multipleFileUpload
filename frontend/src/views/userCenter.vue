@@ -83,7 +83,13 @@
           <el-tabs v-model="activeTab">
             <el-tab-pane label="基本信息" name="userinfo">
 
-              <el-form ref="userFormRef" :model="userForm" :rules="userRules" label-width="80px">
+              <el-form ref="userFormRef" :model="userForm" :rules="userPwdRules" label-width="80px">
+                <el-form-item label="用户头像" prop="avatar">
+                  {{ `${BASE_URL}${userStore.userInfo.avatar}` }}
+                   <div class="block">
+                    <el-avatar :size="80" :src="`${BASE_URL}${userStore.userInfo.avatar}`" />
+                  </div>
+                </el-form-item>
                 <el-form-item label="用户名称" prop="username">
                   <el-input v-model="userForm.username" maxlength="30" disabled />
                 </el-form-item>
@@ -96,7 +102,7 @@
                 <el-form-item label="邮箱" prop="email">
                   <el-input v-model="userForm.email" maxlength="50" />
                 </el-form-item>
-                <el-form-item label="性别">
+                <el-form-item label="性别" prop="gender">
                   <el-radio-group v-model="userForm.gender">
                     <el-radio value="0">保密</el-radio>
                     <el-radio value="1">男</el-radio>
@@ -111,6 +117,21 @@
             </el-tab-pane>
             <el-tab-pane label="修改密码" name="resetPwd">
 
+               <el-form ref="pwdRef" :model="userPassword" :rules="userPwdRules" label-width="80px">
+                <el-form-item label="旧密码" prop="oldPassword">
+                  <el-input v-model="userPassword.oldPassword" placeholder="请输入旧密码" type="password" show-password />
+                </el-form-item>
+                <el-form-item label="新密码" prop="newPassword">
+                  <el-input v-model="userPassword.newPassword" placeholder="请输入新密码" type="password" show-password />
+                </el-form-item>
+                <el-form-item label="确认密码" prop="confirmPassword">
+                  <el-input v-model="userPassword.confirmPassword" placeholder="请确认新密码" type="password" show-password/>
+                </el-form-item>
+                <el-form-item>
+                <el-button type="primary" @click="handleSubmitPwd">保存</el-button>
+                <el-button type="danger" @click="handleClose">关闭</el-button>
+                </el-form-item>
+            </el-form>
 
 
             </el-tab-pane>
@@ -159,17 +180,19 @@ import {
 
 } from "@/api/uploadfile";
 
-import { updateUserEmail, getUserInfo, updateUserInfo } from "@/api/user";
+import { updateUserEmail, getUserInfo, updateUserInfo ,updateUserPassword} from "@/api/user";
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import { id } from 'element-plus/es/locale/index.mjs';
-
+// 统一基础URL
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const router = useRouter();
 const userStore = useUserStore();
 
 // 添加表单引用
 const emailFormRef = ref(null);
 
-const userFormRef = ref(null)
+const userFormRef = ref(null);
+
+const pwdRef = ref(null);
 
 const validateEmail = (rule, value, callback) => {
   // 如果邮箱为空，直接通过验证
@@ -209,12 +232,33 @@ const userForm = reactive({
   nickname: '',
   gender: ''
 });
-const userRules = ref({
-  nickname: [{ required: true, message: "用户昵称不能为空", trigger: "blur" }],
-  email: [{ required: true, message: "邮箱地址不能为空", trigger: "blur" }, { type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] }],
-  phonenumber: [{ required: true, message: "手机号码不能为空", trigger: "blur" }, { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: "请输入正确的手机号码", trigger: "blur" }],
+// const userRules = ref({
+//   nickname: [{ required: true, message: "用户昵称不能为空", trigger: "blur" }],
+//   email: [{ required: true, message: "邮箱地址不能为空", trigger: "blur" }, { type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"] }],
+//   phonenumber: [{ required: true, message: "手机号码不能为空", trigger: "blur" }, { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: "请输入正确的手机号码", trigger: "blur" }],
+//   gender: [{ required: true, message: "请选择性别", trigger: "blur" }]
+// });
+
+
+const userPassword = reactive({
+  oldPassword: undefined,
+  newPassword: undefined,
+  confirmPassword: undefined
 });
 
+const equalToPassword = (rule, value, callback) => {
+  if (userPassword.newPassword !== value) {
+    callback(new Error("两次输入的密码不一致"));
+  } else {
+    callback();
+  }
+};
+
+const userPwdRules = ref({
+  oldPassword: [{ required: true, message: "旧密码不能为空", trigger: "blur" }],
+  newPassword: [{ required: true, message: "新密码不能为空", trigger: "blur" }, { min: 6, max: 20, message: "长度在 6 到 20 个字符", trigger: "blur" }, { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur" }],
+  confirmPassword: [{ required: true, message: "确认密码不能为空", trigger: "blur" }, { required: true, validator: equalToPassword, trigger: "blur" }]
+});
 
 
 // 搜索表单数据
@@ -351,13 +395,10 @@ const handleSubmitUserInfo = () => {
             message: '更新用户基本信息成功！',
             type: 'success',
           });
-          userStore.getInfo().then(res => {
-
-          }).catch(() => {
-          })
+         loadUserInfo()
         } else {
           ElMessage({
-            message: '更新邮箱失败！',
+            message: '更新用户基本信息失败！',
             type: 'error',
           });
         }
@@ -378,6 +419,30 @@ const handleSubmitUserInfo = () => {
 // 关闭按钮
 const handleClose = () => {
   router.push("/fileList");
+}
+
+// 更新用户密码提交
+const handleSubmitPwd = () => { 
+  pwdRef.value.validate((valid) => {
+    if (valid) {
+      // 校验通过，执行更新邮箱逻辑
+      updateUserPassword({
+        id: userStore.userInfo.id,
+        ...userPassword
+      }).then(res => {
+        if (res.code === 200) {
+          ElMessage({
+            message: '更新用户密码成功！,下次登录请使用新密码登录。',
+            type: 'success',
+          });
+          loadUserInfo()
+        } else {
+          ElMessage({})
+        }
+      })
+    }
+  })
+
 }
 
 </script>
