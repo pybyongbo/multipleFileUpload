@@ -174,6 +174,7 @@ function uploadImg() {
       // 关闭对话框
       open.value = false;
       visible.value = false;
+      ElMessage.success("上传头像成功");
       
       // 直接使用返回的新头像URL更新显示
       if (response.data.imgUrl) {
