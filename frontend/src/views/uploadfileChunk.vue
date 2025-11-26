@@ -157,7 +157,7 @@ const clickClearDir = async () => {
 }
 
 // 设置已完成
-const isFinishTask = (item) => {
+const isFinishTask = (item,urlPath) => {
   item.percentage = 100
   item.state = 4
   // 记录完成时间并计算总用时
@@ -166,7 +166,16 @@ const isFinishTask = (item) => {
   
   // 显示完成消息，包含完成时间
   const finishTime = new Date(item.finishedAt).toLocaleString('zh-CN')
-  message(`${item.name} 上传完成，完成时间：${finishTime}，用时：${formatTime(item.totalTime)}`)
+  message(`${item.name} 上传完成，完成时间：${finishTime}，用时：${formatTime(item.totalTime)}`);
+
+  console.log('item',urlPath);
+
+  ElMessage.success({message:'上传完成,3秒后将自动打开新窗口查看~',offset:150});
+
+  setTimeout(() => {
+    window.open(urlPath)
+  }, 3000)
+
 }
 
 // 输入框change事件
@@ -360,7 +369,7 @@ const slicesUpdate = (taskArrItem, progressTotal = 100) => {
             }
           }).catch(() => { })
           
-          resB && resB.data.result === 1 ? isFinishTask(taskArrItem) : pauseUpdate(taskArrItem, false)
+          resB && resB.data.result === 1 ? isFinishTask(taskArrItem,resB.data.urlPath) : pauseUpdate(taskArrItem, false)
           taskArrItem.finishNumber = 0
         } else {
           slicesUpdate(taskArrItem)

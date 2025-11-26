@@ -70,6 +70,26 @@ exports.update = async (ctx) => {
 
 
 
+// exports.mergeSlice = async (ctx) => {
+//   try {
+//     let { folderPath, fileMd5, justMd5, nameSuffix, fileName } = ctx.request.body;
+//     await new Promise((resolve, reject) => {
+//       mergeChunks(folderPath, fileMd5, nameSuffix, (endPathUrl) => {
+//         try {
+//           fs.rmdirSync(folderPath)
+//           let needObj = { url: endPathUrl, name: fileName, md5: justMd5 }
+//           ctx.body = { result: 1, msg: '合并完成' }
+//           resolve()
+//         } catch (e) {
+//           reject(e)
+//         }
+//       })
+//     })
+//   } catch (err) {
+//     console.log('err', err);
+//     ctx.body = { result: -1, msg: '合并失败', data: err }
+//   }
+// }
 exports.mergeSlice = async (ctx) => {
   try {
     let { folderPath, fileMd5, justMd5, nameSuffix, fileName } = ctx.request.body;
@@ -78,7 +98,10 @@ exports.mergeSlice = async (ctx) => {
         try {
           fs.rmdirSync(folderPath)
           let needObj = { url: endPathUrl, name: fileName, md5: justMd5 }
-          ctx.body = { result: 1, msg: '合并完成' }
+          const fullUrl =`${ctx.request.protocol}://${
+          ctx.request.host
+        }/uploads`+ endPathUrl.split('/uploads')[1];
+          ctx.body = { result: 1, msg: '合并完成',urlPath:fullUrl}
           resolve()
         } catch (e) {
           reject(e)
@@ -90,7 +113,6 @@ exports.mergeSlice = async (ctx) => {
     ctx.body = { result: -1, msg: '合并失败', data: err }
   }
 }
-
 
 
 exports.checkFile = async (ctx) => {
