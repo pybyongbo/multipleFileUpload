@@ -1,5 +1,4 @@
 <template>
-
   <!-- <template v-for="option in fileTypeOptions" :key="option.value">
     <el-option
       v-if="!option.children"
@@ -156,6 +155,8 @@ const deleteFile = async (file, index) => {
     ElMessage.error('删除失败')
   }
 }
+
+
 </script>
 
 <style scoped lang="scss">
