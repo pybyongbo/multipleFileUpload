@@ -45,3 +45,9 @@ export const updateUserInfo = params => {
 export const updateUserPassword = params => {
   return http.post('/updatePassword', params);
 }
+
+// 获取所有用户列表
+
+export const getUserList = params => {
+  return http.get('/getUserList', params);
+}

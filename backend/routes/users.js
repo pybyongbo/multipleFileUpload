@@ -32,4 +32,8 @@ router.post('/updateUserInfo', userController.updateUserInfo);
 router.post('/updatePassword', userController.updatePassword);
 
 
+// 管理员角色 获取用户列表
+router.get('/getUserList', userController.getUserList);
+
+
 module.exports = router

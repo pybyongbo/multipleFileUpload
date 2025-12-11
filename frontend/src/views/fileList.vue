@@ -14,7 +14,12 @@
               <ul class="list-group list-group-striped">
                 <li class="list-group-item">
                   <svg-icon icon-class="user" />用户名称
-                  <div class="pull-right">{{ userStore.userInfo.username }}</div>
+                  <div class="pull-right">
+                    {{ userStore.userInfo.username }}
+                    <el-tag :type="userStore.userInfo.user_type === 1 ? 'success' : 'info'">
+                      {{ userStore.userInfo.user_type === 1 ? '超级管理员' : '普通用户' }}
+                    </el-tag>
+                  </div>
                 </li>
                 <li class="list-group-item">
                   <svg-icon icon-class="email" />用户邮箱
@@ -162,7 +167,7 @@
                     <span class="empty-text">暂无数据</span>
                   </div>
                 </template>
-                <el-table-column type="selection"  width="55" fixed="left"/>
+                <el-table-column type="selection"  width="40" fixed="left"/>
                 <el-table-column prop="id" label="Id" width="60" align="center" fixed="left"/>
 
                 <el-table-column prop="full_path" label="缩略图" width="150" align="center" fixed="left">

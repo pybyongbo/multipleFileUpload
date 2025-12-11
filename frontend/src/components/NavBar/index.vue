@@ -68,6 +68,10 @@ function handleCommand(command) {
         <router-link to="/fileList" class="nav-link">
           文件列表
         </router-link>
+
+         <router-link to="/userList" class="nav-link" v-if="userStore.userInfo.user_type=='1'">
+          用户列表
+        </router-link>
       </div>
     </div>
 

@@ -296,8 +296,8 @@ exports.uploadAvatar = async ctx => {
 exports.updateUserInfo = async ctx => {
   try {
     const id = ctx.state.user.id;
-    const {  nickname, phonenumber ,gender} = ctx.request.body;
-    await userModel.updateUserInfo( id, nickname, phonenumber, gender);
+    const {  nickname, phonenumber ,email,gender} = ctx.request.body;
+    await userModel.updateUserInfo( id, nickname, phonenumber,email, gender);
     ctx.body = resObj(200, null, '更新用户信息成功');
     // ctx.body = {
     //   code: 200,
@@ -352,4 +352,23 @@ exports.updatePassword = async ctx => {
     ctx.status = 500;
     ctx.body = resObj(500, null, '服务器内部错误');
   }
+}
+
+
+// 获取用户列表 
+exports.getUserList = async ctx => {
+
+  try {
+     // 获取所有查询参数
+    const query = ctx.query; 
+    const result = await userModel.getUserList({
+      ...query
+    });
+    ctx.body = resObj(200, result, '获取用户列表成功');
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+ 
 }

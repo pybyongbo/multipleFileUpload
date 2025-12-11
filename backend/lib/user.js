@@ -59,17 +59,23 @@ exports.updateUserAvatar = (id, avatar) => {
 }
 
 // 更新用户信息
-exports.updateUserInfo = (id, nickname, phonenumber, gender) => {
+exports.updateUserInfo = (id, nickname, phonenumber,email, gender) => {
 
   // userId, username, nickname, phonenumber, gender
-  let _sql = `UPDATE users SET nickname = ?, phonenumber = ?, gender = ? WHERE id = ?`;
+  let _sql = `UPDATE users SET nickname = ?, phonenumber = ?, email=?, gender = ? WHERE id = ?`;
   console.log('_sql',_sql);
-  return query(_sql, [nickname, phonenumber, gender, id]);
+  return query(_sql, [nickname, phonenumber,email, gender, id]);
 }
 
 // 更新用户密码
 exports.updateUserPassword = (id, password) => {
   let _sql = `UPDATE users SET password = ? WHERE id = ?`;
   return query(_sql, [password, id]);
+}
 
+
+// 查询用户列表
+exports.getUserList = ({page=1, pageSize=10}) => {
+  let _sql = `select * from users limit ${page},${pageSize}`;
+  return query(_sql);
 }
