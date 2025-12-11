@@ -100,18 +100,59 @@
         <el-card class="file-box-card">
           <!--  -->
           <template v-slot:header>
-             <div class="hd-title">
-            系统用户列表
-          </div>
+              <div class="hd-title">
+                  系统用户列表
+                </div>
             </template>
+          <!-- :default-sort="{ prop: 'date', order: 'descending' }" -->
           <el-table
-          :data="tableData"
-          :default-sort="{ prop: 'date', order: 'descending' }"
-          style="width: 100%"
-        >
-          <el-table-column prop="date" label="Date" sortable width="180" />
-          <el-table-column prop="name" label="Name" width="180" />
-          <el-table-column prop="address" label="Address"  />
+            :data="tableData"
+            border
+            stripe
+            style="width: 100%"
+          >
+          <el-table-column prop="username" label="用户名"  align="center"/>
+          <el-table-column prop="nickname" label="用户昵称" align="center">
+             <template #default="scope">
+              {{ scope.row.nickname || '--' }}
+             </template>
+          </el-table-column>
+          <el-table-column prop="email" label="用户邮箱" width="180" align="center">
+             <template #default="scope">
+              {{ scope.row.email || '--' }}
+             </template>
+          </el-table-column>
+
+          <el-table-column sortable prop="file_count" label="上传文件数" width="120" align="center">
+             <template #default="scope">
+              {{ scope.row.file_count || '--' }}
+             </template>
+          </el-table-column>
+          <el-table-column prop="gender" label="用户性别" align="center">
+            <template #default="scope">
+              {{ scope.row.gender === 1 ? '男' : '女' }}
+             </template>
+          </el-table-column>
+          <el-table-column prop="phonenumber" label="用户电话号" align="center">
+            <template #default="scope">
+              {{ scope.row.phonenumber || '--' }}
+             </template>
+          </el-table-column>
+          <el-table-column prop="is_active" label="是否激活" align="center">
+            <template #default="scope">
+              {{ scope.row.is_active ? '是' : '否' }}
+             </template>
+          </el-table-column>
+          <el-table-column prop="created_at" label="注册时间" align="center">
+            <template #default="scope">
+              {{ dayjs(scope.row.created_at).format('YYYY-MM-DD ') }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="last_login" label="最后登录时间" align="center">
+             <template #default="scope">
+              {{ dayjs(scope.row.last_login).format('YYYY-MM-DD ') }}
+            </template>
+          </el-table-column>
         </el-table>
          
         </el-card>
@@ -191,28 +232,28 @@ const fileTypeOptions = ref([
 ]);
 
 
-const tableData = [
-  {
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-04',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-01',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-]
+const tableData = ref([
+  // {
+  //   date: '2016-05-03',
+  //   name: 'Tom',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
+  // {
+  //   date: '2016-05-02',
+  //   name: 'Tom',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
+  // {
+  //   date: '2016-05-04',
+  //   name: 'Tom',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
+  // {
+  //   date: '2016-05-01',
+  //   name: 'Tom',
+  //   address: 'No. 189, Grove St, Los Angeles',
+  // },
+]);
 
 
 // const selectedTab = ref("active");
@@ -370,6 +411,7 @@ const getAllUserList = async () => {
     const res = await getUserList();
     console.log('res.data',res.data);
     // otherFileListData.value = res.data;
+    tableData.value = res.data;
 
   } catch (error) {
     console.error('获取用户列表失败:', error);

@@ -74,8 +74,14 @@ exports.updateUserPassword = (id, password) => {
 }
 
 
-// 查询用户列表
+// 查询用户列表  (链接查询获取用户上传文件数量)
 exports.getUserList = ({page=1, pageSize=10}) => {
-  let _sql = `select * from users limit ${page},${pageSize}`;
+  // let _sql = `select * from users limit ${page},${pageSize}`;
+  let _sql = `SELECT u.*,COUNT(f.id) AS file_count
+    FROM users as u
+    LEFT JOIN files as f ON u.id = f.uploader_id
+    GROUP BY u.id, u.username, u.email
+    ORDER BY file_count DESC, u.id ASC limit ${page-1},${pageSize}`;
+
   return query(_sql);
 }

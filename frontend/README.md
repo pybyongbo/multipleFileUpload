@@ -46,3 +46,25 @@ ADD COLUMN `user_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '用户类型: 0-
 ```
 
 
+用户列表链接查询统计上传文件总数
+
+```sql
+SELECT 
+    u.*,
+    COUNT(f.id) AS file_count
+FROM `users` as u
+LEFT JOIN files as f ON u.id = f.uploader_id
+GROUP BY u.id, u.username, u.email
+ORDER BY file_count DESC, u.id ASC;
+```
+
+
+```sql
+SELECT 
+		u.username,
+		f.mime_type,
+    COUNT(f.id) AS file_count
+FROM `users` as u
+LEFT JOIN files as f ON u.id = f.uploader_id
+GROUP BY  f.mime_type,u.username;
+```
