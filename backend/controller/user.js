@@ -364,7 +364,19 @@ exports.getUserList = async ctx => {
     const result = await userModel.getUserList({
       ...query
     });
-    ctx.body = resObj(200, result, '获取用户列表成功');
+
+    const total = await userModel.getUserCount(); // 总记录数
+
+    // ctx.body = resObj(200, result, '获取用户列表成功');
+    // console.log(111,{
+    //   ...resObj(200, result, '查询成功'),
+    //     total: total[0].totalCount,
+    // });
+
+    ctx.body = {
+       ...resObj(200, result, '查询成功'),
+        total: total[0].totalCount,
+    }
   } catch (err) {
     console.error(err);
     ctx.status = 500;

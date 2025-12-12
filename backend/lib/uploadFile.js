@@ -265,7 +265,7 @@ exports.getFileListDeletedByUserId = (userId, conditions = {}) => {
    // 添加排序和分页
   baseSql += ` ORDER BY delete_time DESC LIMIT ?, ?`;
   params.push((conditions.page - 1) * 10, 10);
-  // console.log('123131',JSON.stringify(conditions));
+
   return query(baseSql, params);
 
 }

@@ -74,14 +74,47 @@ exports.updateUserPassword = (id, password) => {
 }
 
 
+// 查询用户总数用于分页信息
+exports.getUserCount = () => {
+  let _sql = `select count(*) as totalCount from users`;
+  return query(_sql);
+}
+
+
 // 查询用户列表  (链接查询获取用户上传文件数量)
 exports.getUserList = ({page=1, pageSize=10}) => {
   // let _sql = `select * from users limit ${page},${pageSize}`;
-  let _sql = `SELECT u.*,COUNT(f.id) AS file_count
-    FROM users as u
-    LEFT JOIN files as f ON u.id = f.uploader_id
-    GROUP BY u.id, u.username, u.email
-    ORDER BY file_count DESC, u.id ASC limit ${page-1},${pageSize}`;
+  // 这个是链接查询获取上传文件总数
+  // let _sql = `SELECT u.*,COUNT(f.id) AS file_count
+  //   FROM users as u
+  //   LEFT JOIN files as f ON u.id = f.uploader_id
+  //   GROUP BY u.id, u.username, u.email
+  //   ORDER BY file_count DESC, u.id ASC limit ${page-1},${pageSize}`;
+
+  console.log('page,pageSize',page,pageSize);
+// 计算偏移量
+  const offset = (page - 1) * pageSize;
+  let _sql = `SELECT 
+        u.*,
+        (SELECT COUNT(*) FROM files f WHERE f.uploader_id = u.id AND f.mime_type LIKE 'image/%') AS image_count,
+        (SELECT COUNT(*) FROM files f WHERE f.uploader_id = u.id AND f.mime_type IN (
+          'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'text/plain', 'text/html', 'text/css', 'text/javascript', 'application/json'
+        )) AS document_count,
+        (SELECT COUNT(*) FROM files f WHERE f.uploader_id = u.id AND 
+          f.mime_type NOT LIKE 'image/%' AND 
+          f.mime_type NOT IN (
+            'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'text/plain', 'text/html', 'text/css', 'text/javascript', 'application/json'
+          )
+        ) AS other_count,
+        (SELECT COUNT(*) FROM files f WHERE f.uploader_id = u.id) AS total_file_count
+      FROM users u
+      ORDER BY total_file_count DESC, u.id ASC LIMIT ${offset}, ${pageSize}`;
 
   return query(_sql);
 }

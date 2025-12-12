@@ -111,7 +111,11 @@
             stripe
             style="width: 100%"
           >
-          <el-table-column prop="username" label="用户名"  align="center"/>
+          <el-table-column prop="username" label="用户名"  align="center">
+            <template #default="scope">
+              <b>{{ scope.row.username }}</b>
+             </template>
+          </el-table-column>
           <el-table-column prop="nickname" label="用户昵称" align="center">
              <template #default="scope">
               {{ scope.row.nickname || '--' }}
@@ -123,9 +127,22 @@
              </template>
           </el-table-column>
 
-          <el-table-column sortable prop="file_count" label="上传文件数" width="120" align="center">
+          <el-table-column sortable prop="file_count" label="上传文件数" width="120" row-class-name="tableRowClassName" align="center">
              <template #default="scope">
-              {{ scope.row.file_count || '--' }}
+                <el-popover
+                  trigger="hover"
+                  placement="right"
+                  v-if="scope.row.total_file_count"
+                >
+                 <p>图片数量:{{scope.row.image_count}}</p>
+                 <p>文档数量:{{scope.row.document_count}}</p>
+                 <p>其他数量:{{scope.row.other_count}}</p>
+
+                  <template #reference>
+                    <el-button type="text">{{ scope.row.total_file_count || '--' }}</el-button>
+                  </template>
+                </el-popover>
+                <span v-else>{{ scope.row.total_file_count || '--' }}</span>
              </template>
           </el-table-column>
           <el-table-column prop="gender" label="用户性别" align="center">
@@ -139,6 +156,14 @@
              </template>
           </el-table-column>
           <el-table-column prop="is_active" label="是否激活" align="center">
+            <template #header>
+              <el-tooltip content="备用字段,用于判断用户是否激活" placement="top">
+                  <span class="tooltip-text" style="position: relative;">是否激活 <el-icon>
+                        <QuestionFilled style="position:absolute;top:1px;"/>
+                      </el-icon>
+                    </span>
+              </el-tooltip>
+            </template>
             <template #default="scope">
               {{ scope.row.is_active ? '是' : '否' }}
              </template>
@@ -154,7 +179,12 @@
             </template>
           </el-table-column>
         </el-table>
-         
+         <div class="listBoxBottom" v-if="totalCount > 0">
+          <div class="totalText">共 {{ totalCount }} 条数据</div>
+          <el-pagination size="small" background :current-page="pageActive" :page-size="pageSize"
+            layout="prev, pager, next" @current-change="upDataCurPage" :total="totalCount" class="mt-4">
+          </el-pagination>
+        </div>
         </el-card>
       </el-col>
     </el-row>
@@ -192,7 +222,8 @@ import useUserStore from '@/store/modules/user';
 import useFileStore from '../store/modules/file';
 
 import { dayjs,ElMessage, ElMessageBox } from 'element-plus';
-import {WarningFilled} from '@element-plus/icons-vue'
+import {QuestionFilled,WarningFilled} from '@element-plus/icons-vue'
+
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -213,23 +244,28 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 const router = useRouter();
 const userStore = useUserStore();
 
+const totalCount = ref(0); // 总数据量
+const pageActive = ref(1); // 当前页码
+
+const pageSize = ref(10); // 每页显示的数据量
+
 // const fileStore = useFileStore();
 
 // const multipleTableRef = ref(null);
 // const multipleSelection = ref([]);
 
 // 搜索表单数据
-const searchFormRef = ref(null);
-const searchForm = reactive({
-  fileName: "",
-  fileType: "",
-  fileUploadTime: "",
-});
+// const searchFormRef = ref(null);
+// const searchForm = reactive({
+//   fileName: "",
+//   fileType: "",
+//   fileUploadTime: "",
+// });
 
-// 文件类型选项
-const fileTypeOptions = ref([
-  { label: '全部', value: '' }
-]);
+// // 文件类型选项
+// const fileTypeOptions = ref([
+//   { label: '全部', value: '' }
+// ]);
 
 
 const tableData = ref([
@@ -280,7 +316,6 @@ const currentIndex = ref(0);
 // 其他文件
 const otherFileListData = ref([]);
 const dialogFormVisible = ref(false);
-
 
 // 判断是否需要显示 tooltip（当文本被截断时才显示）
 const shouldShowTooltip = (text) => {
@@ -408,16 +443,44 @@ const getOtherFileList = async () => {
 
 const getAllUserList = async () => { 
    try {
-    const res = await getUserList();
+    const res = await getUserList({
+      page: pageActive.value,
+      pageSize: pageSize.value
+    });
     console.log('res.data',res.data);
     // otherFileListData.value = res.data;
     tableData.value = res.data;
+    totalCount.value = res.total;
 
   } catch (error) {
     console.error('获取用户列表失败:', error);
   }
 };
 
+const upDataCurPage = (page) => {
+  pageActive.value = page;
+  nextTick(() => {
+    const container = document.querySelector('.app-container');
+    if (container) {
+      container.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } else {
+      // 备用方案：滚动整个窗口
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  });
+}
+
+// 监听分页变化
+watch(pageActive, (newPage) => {
+  pageActive.value = newPage;
+  getAllUserList();
+});
 
 </script>
 
@@ -430,8 +493,6 @@ const getAllUserList = async () => {
   overflow-x: hidden;
   padding-bottom:120px;
 }
-
-
 
 .main-content {
   display: flex;
@@ -733,10 +794,7 @@ const getAllUserList = async () => {
   }
 }
 
-
-
 .file-link-type{
-
   padding-right:20px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -797,25 +855,35 @@ const getAllUserList = async () => {
   }
    .file-name-label :deep(.el-form-item__label){
     width:70px!important;
-    //display1: none;
    }
  }
+.listBoxBottom {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 
-</style>
-
-<style lang="scss">
-
-.custom-delete-confirm{
-  .el-message-box__container{
-    display: block;
-    position: relative;
-
-    .el-icon.el-message-box__status.el-message-box-icon--warning{
-      position: absolute;
-      top: 0px;
-      left: 0px;
+  .totalText {
+    margin-right: 20px;
+    font-size: 14px;
+    color: #606266;
+    line-height: 32px;
+  }
+}
+// 完整的表格样式调整
+:deep(.el-table) {
+  // 设置表格行高
+  .el-table__row {
+    height: 50px;
+    
+    td {
+      padding: 5px 0;
+      box-sizing: border-box;
+      // 垂直居中
+      .cell {
+        line-height: 1.4;
+      }
     }
   }
 }
-
 </style>
+
