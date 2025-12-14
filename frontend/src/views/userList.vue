@@ -333,6 +333,14 @@
     const tableEl = elTableRef.value?.$el;
     if (!tableEl) return;
 
+    if(pageSize.value < 50) {
+      ElMessage({
+        message: '请选择每页显示50条数据后打印',
+        type: 'warning',
+      });
+      return;
+    }
+
     const headerTable = tableEl.querySelector('.el-table__header-wrapper table');
     const bodyTable = tableEl.querySelector('.el-table__body-wrapper table');
 
