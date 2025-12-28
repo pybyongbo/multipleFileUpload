@@ -35,5 +35,19 @@ router.post('/updatePassword', userController.updatePassword);
 // 管理员角色 获取用户列表
 router.get('/getUserList', userController.getUserList);
 
+// 根据用户ID查询用户信息
+router.get('/getUserInfoById/:id', userController.getUserInfoById);
+
+
+
+// 管理员更新用户所有信息接口
+router.post('/updateUserAllInfo', userController.updateUserAllInfo);
+
+
+// 删除用户接口
+router.post('/deleteUser', userController.deleteUser);
+
+
+
 
 module.exports = router

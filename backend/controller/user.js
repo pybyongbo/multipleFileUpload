@@ -384,3 +384,50 @@ exports.getUserList = async ctx => {
   }
  
 }
+
+// 根据用户ID查询用户信息 getUserInfoById
+exports.getUserInfoById = async ctx => {
+  try {
+    const userId = ctx.params.id;
+    const result = await userModel.findUserById(userId);
+    if (result.length) {
+      ctx.body = resObj(200, result[0], '查询成功');
+    } else {
+      ctx.status = 404;
+      ctx.body = resObj(404, null, '用户不存在');
+    }
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+// 管理员更新用户所有信息 
+
+exports.updateUserAllInfo = async ctx => { 
+
+   try {
+    const {id,username,nickname, phonenumber ,email,gender,is_active} = ctx.request.body;
+    await userModel.updateUserAllInfo({ id, username,nickname, phonenumber,email, gender,is_active});
+    ctx.body = resObj(200, null, '修改用户信息成功');
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+// 删除用户
+exports.deleteUser = async ctx => {
+  try {
+    const {id} = ctx.request.body;
+    await userModel.deleteUser(id);
+    ctx.body = resObj(200, null, '删除用户成功');
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}

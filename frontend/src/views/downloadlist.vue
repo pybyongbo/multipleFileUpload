@@ -187,7 +187,8 @@
                   </el-tooltip>
                 </div>
               </template>
-                 <img v-if="getCategoryLabel(getMimeTypeCategory(file.mime_type)) == '图片'" :src="file.full_path" />
+                    <img v-if="getCategoryLabel(getMimeTypeCategory(file.mime_type)) == '图片'" :src="file.full_path" />
+                   <video v-else-if="isVideo(file.file_name)" :src="file.full_path" controls class="thumbnail-video" />
                  <div v-else class="non-image-placeholder">{{getFileExtension(file.file_name).substring(1)}}类型文件<br/><br/>非图片文件,无缩略图</div>
                 <template #footer>
                   <el-button type="primary" link @click="downloadFileToLocal(file.id, file.file_name)">下载文件</el-button>
@@ -220,7 +221,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 
 import Carousel from '@/components/Carousel';
-import { isImage, bytesToKB, getMimeTypeCategory, formatDateRange, getFileExtension } from '@/utils/tools';
+import { isImage,isVideo, bytesToKB, getMimeTypeCategory, formatDateRange, getFileExtension } from '@/utils/tools';
 import { scrollTo } from '@/utils/scroll-to.js';
 import { mimeTypeMap } from '@/utils/constant.js';
 import {
@@ -827,6 +828,11 @@ const downloadFileToLocal = async (fileId, fileName) => {
   :deep(.el-card__body) {
     height: 210px;
     img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+    }
+    video{
       height: 100%;
       width: 100%;
       object-fit: contain;

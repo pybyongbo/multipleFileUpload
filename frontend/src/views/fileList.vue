@@ -175,6 +175,10 @@
                     <div v-if="isImage(scope.row.file_name)" class="thumbnail-container">
                       <img :src="scope.row.full_path" :alt="scope.row.originalName" class="thumbnail-img" />
                     </div>
+
+                    <div v-else-if="isVideo(scope.row.file_name)" class="thumbnail-container">
+                      <video :src="scope.row.full_path" controls class="thumbnail-video" />
+                    </div>
                     <div v-else class="non-image-placeholder">
                       非图片文件
                     </div>
@@ -329,6 +333,9 @@
                     <div v-if="isImage(scope.row.file_name)" class="thumbnail-container">
                       <img :src="scope.row.full_path" :alt="scope.row.originalName" class="thumbnail-img" />
                     </div>
+                     <div v-else-if="isVideo(scope.row.file_name)" class="thumbnail-container">
+                      <video :src="scope.row.full_path" controls class="thumbnail-video" />
+                    </div>
                     <div v-else class="non-image-placeholder">
                       非图片文件
                     </div>
@@ -434,7 +441,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 import Carousel from '@/components/Carousel';
-import { isImage,bytesToKB,getMimeTypeCategory,formatDateRange,getFileExtension } from '@/utils/tools';
+import { isImage,isVideo,bytesToKB,getMimeTypeCategory,formatDateRange,getFileExtension } from '@/utils/tools';
 import { scrollTo } from '@/utils/scroll-to.js';
 import {mimeTypeMap} from '@/utils/constant.js';
 import { 

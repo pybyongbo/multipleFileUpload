@@ -51,3 +51,20 @@ export const updateUserPassword = params => {
 export const getUserList = params => {
   return http.get('/getUserList', params);
 }
+
+
+// 查询用户详情信息
+export const getUserDetail = (id) => {
+  console.log('id',id);
+  return http.get(`/getUserInfoById/${id}`);
+};
+
+// 管理员更新用户所有信息
+export const updateUserAllInfo = params => {
+  return http.post('/updateUserAllInfo', params);
+}
+
+// 删除用户
+export const deleteUserById = (params) => {
+  return http.post('/deleteUser', params);
+}

@@ -26,8 +26,6 @@ exports.findDataByName = (name) => {
   return query(_sql, name);
 }
 
-
-
 // 根据用户ID查找用户
 exports.findUserById = (id) => {
   let _sql = `SELECT * FROM users WHERE id = ?`;
@@ -117,4 +115,17 @@ exports.getUserList = ({page=1, pageSize=10}) => {
       ORDER BY total_file_count DESC, u.id ASC LIMIT ${offset}, ${pageSize}`;
 
   return query(_sql);
+}
+
+// 更新用户所有信息
+exports.updateUserAllInfo = ({id,username, nickname, phonenumber, email, gender,is_active}) => {
+  let _sql = `UPDATE users SET username = ?, nickname = ?, phonenumber = ?, email=?, gender = ?, is_active = ? WHERE id = ?`;
+  console.log('_sql',_sql);
+  return query(_sql, [username, nickname, phonenumber,email, gender, is_active, id]);
+}
+
+// 删除用户
+exports.deleteUser = (id) => {
+  let _sql = `DELETE FROM users WHERE id = ?`;
+  return query(_sql, [id]);
 }

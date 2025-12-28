@@ -106,35 +106,35 @@
               <!-- <el-button type="primary" @click="handlePrintUserList" style="margin-bottom: 0;">打印列表</el-button> -->
               <div>
                 <!-- <el-dropdown>
-                  <el-button type="primary">
-                    打印列表 <el-icon class="el-icon--right"><arrow-down /></el-icon>
-                    <el-tooltip content="备用字段,用于判断用户是否激活" placement="top">
+                    <el-button type="primary">
+                      打印列表 <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                      <el-tooltip content="备用字段,用于判断用户是否激活" placement="top">
 
-                    </el-tooltip>
-                  </el-button>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="handlePrintUserList" >实现方法 1</el-dropdown-item>
-                      <el-dropdown-item @click="handlePrintUserListNewPage">实现方法 2</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown> -->
+                      </el-tooltip>
+                    </el-button>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item @click="handlePrintUserList" >实现方法 1</el-dropdown-item>
+                        <el-dropdown-item @click="handlePrintUserListNewPage">实现方法 2</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+    </el-dropdown> -->
                 <el-button type="primary" @click="handlePrintUserList" style="margin-bottom: 0;">打印列表</el-button>
                 <el-tooltip content="打印列表每一页都显示表头,请先切换每一页显示50条,查看效果" placement="top">
                   <el-icon>
-                  <QuestionFilled style="position:absolute;top:2px;right: 10px;" />
-                </el-icon>
+                    <QuestionFilled style="position:absolute;top:2px;right: 10px;" />
+                  </el-icon>
                 </el-tooltip>
               </div>
             </div>
           </template>
           <el-table :data="tableData" ref="elTableRef" style="width: 100%">
-            <el-table-column prop="username" label="用户名" align="center">
+            <el-table-column prop="username" label="用户名" align="center" fixed width="150">
               <template #default="scope">
                 <b>{{ scope.row.username }}</b>
               </template>
             </el-table-column>
-            <el-table-column prop="nickname" label="用户昵称" align="center">
+            <el-table-column prop="nickname" label="用户昵称" align="center" fixed width="150">
               <template #default="scope">
                 {{ scope.row.nickname || '--' }}
               </template>
@@ -154,7 +154,8 @@
                   <p>其他数量:{{ scope.row.other_count }}</p>
 
                   <template #reference>
-                    <el-button type="text">{{ scope.row.total_file_count || '--' }}</el-button>
+                    <el-button link style="color:var(--el-color-primary);">{{ scope.row.total_file_count || '--'
+                    }}</el-button>
                   </template>
                 </el-popover>
                 <span v-else>{{ scope.row.total_file_count || '--' }}</span>
@@ -180,7 +181,9 @@
                 </el-tooltip>
               </template>
               <template #default="scope">
-                {{ scope.row.is_active ? '是' : '否' }}
+                <!-- {{ scope.row.is_active ? '是' : '否' }} -->
+                <el-tag type="success" v-if="scope.row.is_active == 1">是</el-tag>
+                <el-tag type="danger" v-else>否</el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="created_at" label="注册时间" align="center">
@@ -194,14 +197,15 @@
               </template>
             </el-table-column>
 
-            <el-table-column prop="options" label="操作" align="center" class="options">
+            <el-table-column prop="options" label="操作" align="center" class="options" fixed="right" min-width="120">
               <template #default="scope">
-                <el-button type="primary" link @click="updateUser(scope.row)">修改</el-button>
-                <el-button type="danger" link @click="deleteUser(scope.row)">删除</el-button>
+                <el-button type="primary" link @click="updateUser(scope.row.id)">修改</el-button>
+                <el-button v-if="scope.row.username !== userStore.userInfo.username" type="danger" link
+                  @click="deleteUser(scope.row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
-          <!-- :page-size="pageSize" -->
+
           <div class="listBoxBottom" v-if="totalCount > 0">
             <div class="totalText">共 {{ totalCount }} 条数据</div>
             <el-pagination size="small" background :current-page="pageActive" :page-sizes="[10, 20, 50, 100]"
@@ -231,6 +235,12 @@
         </div>
       </template>
     </el-dialog>
+
+
+    <div>
+      <UserDialog :open="dialogVisible" :detailInfo="detailInfo" @handleSubmit="handleSubmit"
+        @handleClose="handleClose" />
+    </div>
   </div>
 </template>
 
@@ -244,35 +254,30 @@
 
   import { useRoute, useRouter } from 'vue-router';
 
-
+  import UserDialog from '@/components/UserForm/index.vue';
 
   import Carousel from '@/components/Carousel';
-  import { isImage, bytesToKB, getMimeTypeCategory, formatDateRange, getFileExtension } from '@/utils/tools';
-  import { scrollTo } from '@/utils/scroll-to.js';
-  import { mimeTypeMap } from '@/utils/constant.js';
+  // import { isImage, bytesToKB, getMimeTypeCategory, formatDateRange, getFileExtension } from '@/utils/tools';
+  // import { scrollTo } from '@/utils/scroll-to.js';
+  // import { mimeTypeMap } from '@/utils/constant.js';
   import {
     getCarouselData,
     getOtherFileListTop5,
 
   } from "@/api/uploadfile";
 
-  import { updateUserEmail, getUserInfo, getUserList } from "@/api/user";
-  import { getToken, setToken, removeToken } from '@/utils/auth'
+  import { updateUserEmail, getUserInfo, getUserList, getUserDetail, updateUserAllInfo, deleteUserById } from "@/api/user";
+  // import { getToken, setToken, removeToken } from '@/utils/auth';
 
   const router = useRouter();
   const userStore = useUserStore();
 
   const totalCount = ref(0); // 总数据量
   const pageActive = ref(1); // 当前页码
-
   const pageSize = ref(10); // 每页显示的数据量
 
-
   const elTableRef = ref();
-
   const tableData = ref([]);
-
-
 
   // 轮播图数据
   const carouselRef = ref(null);
@@ -320,6 +325,9 @@
 
   const { user, rules } = toRefs(formData);
 
+  const dialogVisible = ref(false);
+  const detailInfo = ref({});
+
   const upDateEmailInfo = () => {
     dialogFormVisible.value = true;
   }
@@ -333,7 +341,7 @@
     const tableEl = elTableRef.value?.$el;
     if (!tableEl) return;
 
-    if(pageSize.value < 50) {
+    if (pageSize.value < 50) {
       ElMessage({
         message: '请选择每页显示50条数据后打印',
         type: 'warning',
@@ -368,11 +376,7 @@
     }, 500);
   }
 
-
   // 新开页面打印用户列表
-
-// 新开页面打印用户列表
-
   const submitEmailForm = () => {
     emailFormRef.value.validate((valid) => {
       if (valid) {
@@ -435,16 +439,10 @@
           console.log(555, clonedThead);
           clonedThead.classList.add('clone-thead'); // 标记用于清理
           bodyTable.insertBefore(clonedThead, bodyTable.firstChild);
-
-
         }
       }
     }, 100);
   });
-
-
-
-
 
 
   // 轮播图数据
@@ -527,6 +525,74 @@
     pageActive.value = newPage;
     getAllUserList();
   });
+
+  // 修改用户信息
+  const updateUser = async (id) => {
+
+    console.log('id', id);
+
+    const res = await getUserDetail(id);
+
+    console.log('res111', res.data);
+
+    dialogVisible.value = true;
+    detailInfo.value = res.data
+
+    console.log(5555, dialogVisible.value);
+
+  };
+
+  // 删除用户
+
+  const deleteUser = async (row) => {
+    console.log('id', row.id);
+    ElMessageBox.confirm(`确定要删除用户名为 <strong style="color: #f56c6c; font-size: 16px; background: #fef0f0; padding: 2px 6px; border-radius: 4px; margin: 0 5px;">${row.username}</strong>的用户吗?`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+      dangerouslyUseHTMLString: true  // 启用 HTML 渲染
+    }).then(() => {
+      deleteUserById({ id: row.id }).then(res => {
+        if (res.code === 200) {
+          ElMessage({
+            message: '删除用户成功！',
+            type: 'success',
+          });
+          getAllUserList();
+        } else {
+          ElMessage({
+            message: '删除用户失败！',
+            type: 'error',
+          });
+        }
+      })
+    })
+  }
+
+
+  const handleSubmit = (formData) => {
+    console.log('update info');
+    updateUserAllInfo(formData).then(res => {
+      if (res.code === 200) {
+        ElMessage({
+          message: '更新用户信息成功！',
+          type: 'success',
+        });
+        dialogVisible.value = false;
+        getAllUserList();
+      } else {
+        ElMessage({
+          message: '更新用户信息失败！',
+          type: 'error',
+        });
+      }
+    })
+  };
+
+
+  const handleClose = () => {
+    dialogVisible.value = false;
+  };
 
 </script>
 
