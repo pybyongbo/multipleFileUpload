@@ -162,8 +162,6 @@
     const finishTime = new Date(item.finishedAt).toLocaleString('zh-CN')
     message(`${item.name} 上传完成，完成时间：${finishTime}，用时：${formatTime(item.totalTime)}`);
 
-    console.log('item', urlPath);
-
     ElMessage.success({ message: '上传完成,3秒后将自动打开新窗口查看~', offset: 150 });
 
     setTimeout(() => {
@@ -306,7 +304,6 @@
   // 切片上传
   const slicesUpdate = (taskArrItem, progressTotal = 100) => {
     // 一片都没有了,或者有正在请求中的接口,都直接不执行下边的逻辑,毕竟都有正在请求中的还上传,容易造成并发数高于浏览器限制
-    // console.log(6666,taskArrItem.allData.length === 0 || taskArrItem.whileRequests.length > 0);
     if (taskArrItem.allData.length === 0 || taskArrItem.whileRequests.length > 0) { return }
 
     const isTaskArrIng = toRaw(taskArr.value).filter(itemB => itemB.state === 1 || itemB.state === 2)
