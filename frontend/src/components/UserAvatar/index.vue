@@ -184,8 +184,6 @@ function uploadImg() {
         options.img =BASE_URL + fullAvatarUrl;
         userStore.userInfo.avatar = fullAvatarUrl;
 
-        
-       
         // 强制触发Vue的响应式更新
         setTimeout(() => {
           options.img =BASE_URL + fullAvatarUrl;

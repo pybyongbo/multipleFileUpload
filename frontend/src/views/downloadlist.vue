@@ -14,7 +14,6 @@
                 <li class="list-group-item">
                   <svg-icon icon-class="user" />用户名称
                   <div class="pull-right">{{ userStore.userInfo.username }}
-
                     <el-tag :type="userStore.userInfo.user_type === 1 ? 'success' : 'info'">
                       {{ userStore.userInfo.user_type === 1 ? '超级管理员' : '普通用户' }}
                     </el-tag>
