@@ -142,7 +142,15 @@ exports.checkFile = async (ctx) => {
       const existingFile = files.find(item => item.startsWith(md5));
       
       if (existingFile) {
-        ctx.body = {result: -1, msg: '该文件已经上传完成了'};
+        // 构建文件的完整 URL
+        const filePath = path.join(finishPath, existingFile);
+        const fileUrl = `/uploads/finish/${existingFile}`;
+        const fullUrl = `${ctx.request.protocol}://${ctx.request.host}${fileUrl}`;
+        ctx.body = {
+          result: -1, msg: '该文件已经上传完成了', 
+          urlPath: fullUrl,  // 添加文件的可访问 URL
+          fileName: existingFile  // 可选：返回文件名
+        };
       } else {
         ctx.body = {result: 1, msg: '还没上传过这个文件'};
       }

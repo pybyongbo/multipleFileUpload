@@ -237,7 +237,7 @@
     </el-dialog>
 
 
-    <div>
+    <div v-if="dialogVisible">
       <UserDialog :open="dialogVisible" :detailInfo="detailInfo" @handleSubmit="handleSubmit"
         @handleClose="handleClose" />
     </div>
