@@ -13,17 +13,21 @@
               <ul class="list-group list-group-striped">
                 <li class="list-group-item">
                   <svg-icon icon-class="user" />用户名称
-                  <div class="pull-right">{{ userStore.name }}</div>
+                  <div class="pull-right">{{ userStore.userInfo.username }}
+                    <el-tag :type="userStore.userInfo.user_type === 1 ? 'success' : 'info'">
+                      {{ userStore.userInfo.user_type === 1 ? '超级管理员' : '普通用户' }}
+                    </el-tag>
+                  </div>
                 </li>
                 <li class="list-group-item">
                   <svg-icon icon-class="email" />用户邮箱
-                  <div class="pull-right" v-if="userStore.email">{{ userStore.email }}</div>
+                  <div class="pull-right" v-if="userStore.userInfo.email">{{ userStore.userInfo.email }}</div>
                   <div class="pull-right no-email" v-else><span style="vertical-align: -1px;">未填写</span> <el-button link
                       type="primary" size="small" @click="upDateEmailInfo">更新</el-button></div>
                 </li>
                 <li class="list-group-item">
                   <svg-icon icon-class="date" />用户注册时间
-                  <div class="pull-right">{{ dayjs(userStore.created_at).format('YYYY-MM-DD HH:mm:ss') }} </div>
+                  <div class="pull-right">{{ dayjs(userStore.userInfo.created_at).format('YYYY-MM-DD HH:mm:ss') }} </div>
                 </li>
                 <li class="list-group-item">
                   <svg-icon icon-class="time" />最后登录时间
@@ -32,7 +36,7 @@
 
                 <li class="list-group-item">
                   <svg-icon icon-class="online" />最后登录IP地址
-                  <div class="pull-right">{{ userStore.login_ip }}</div>
+                  <div class="pull-right">{{ userStore.userInfo.login_ip }}</div>
                 </li>
               </ul>
             </div>
@@ -182,7 +186,8 @@
                   </el-tooltip>
                 </div>
               </template>
-                 <img v-if="getCategoryLabel(getMimeTypeCategory(file.mime_type)) == '图片'" :src="file.full_path" />
+                    <img v-if="getCategoryLabel(getMimeTypeCategory(file.mime_type)) == '图片'" :src="file.full_path" />
+                   <video v-else-if="isVideo(file.file_name)" :src="file.full_path" controls class="thumbnail-video" />
                  <div v-else class="non-image-placeholder">{{getFileExtension(file.file_name).substring(1)}}类型文件<br/><br/>非图片文件,无缩略图</div>
                 <template #footer>
                   <el-button type="primary" link @click="downloadFileToLocal(file.id, file.file_name)">下载文件</el-button>
@@ -215,7 +220,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 
 import Carousel from '@/components/Carousel';
-import { isImage, bytesToKB, getMimeTypeCategory, formatDateRange, getFileExtension } from '@/utils/tools';
+import { isImage,isVideo, bytesToKB, getMimeTypeCategory, formatDateRange, getFileExtension } from '@/utils/tools';
 import { scrollTo } from '@/utils/scroll-to.js';
 import { mimeTypeMap } from '@/utils/constant.js';
 import {
@@ -822,6 +827,11 @@ const downloadFileToLocal = async (fileId, fileName) => {
   :deep(.el-card__body) {
     height: 210px;
     img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+    }
+    video{
       height: 100%;
       width: 100%;
       object-fit: contain;

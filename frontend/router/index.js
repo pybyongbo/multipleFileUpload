@@ -4,9 +4,7 @@ import {
 } from 'vue-router';
 import Layout from '@/views/layout.vue'
 import UploadFile from '@/views/uploadFile.vue';
-
 import UploadfileBase64 from '@/views/uploadfileBase64.vue';
-
 import UploadfileBinary from '@/views/uploadfileBinary.vue';
 
 import Login from '@/views/login.vue';
@@ -21,6 +19,9 @@ import DownloadFileList from '@/views/downloadlist.vue';
 
 // 个人中心
 import UserCenter from '@/views/userCenter.vue';
+
+// 用户列表
+import UserList from '@/views/userList.vue';
 
 const routes = [
   {
@@ -95,12 +96,22 @@ const routes = [
           title: '文件列表',
           requiresAuth: true 
         }
-      },{
+      },
+      {
         path: '/userCenter',
         name: 'userCenter',
         component: UserCenter,
         meta: { 
           title: '个人中心',
+          requiresAuth: true 
+        }
+      },
+      {
+        path: '/userList',
+        name: 'userList',
+        component: UserList,
+        meta: { 
+          title: '用户列表',
           requiresAuth: true 
         }
       }

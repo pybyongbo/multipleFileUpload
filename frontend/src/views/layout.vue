@@ -1,6 +1,6 @@
 <template>
   <div class="app-wrapper app-layout">
-    <Watermark :text="`当前用户:${userStore.name}`" :opacity="0.3" :font-size="30" color="#dedede" :gap="30">
+    <Watermark :text="`当前用户:${userStore.userInfo.username}`" :opacity="0.3" :font-size="30" color="#dedede" :gap="30">
       <div class="main-layout">
         <NavBar />
         <div class="layout-content">
@@ -20,6 +20,7 @@ import Watermark from '@/components/WaterMark/index.vue';
 import useUserStore from '@/store/modules/user';
 
 const userStore = useUserStore();
+console.log('userStore', userStore);
 </script>
 
 <style lang="scss" scoped>

@@ -296,13 +296,135 @@ exports.uploadAvatar = async ctx => {
 exports.updateUserInfo = async ctx => {
   try {
     const id = ctx.state.user.id;
-    const {  nickname, phonenumber ,gender} = ctx.request.body;
-    await userModel.updateUserInfo( id, nickname, phonenumber, gender);
+    const {  nickname, phonenumber ,email,gender} = ctx.request.body;
+    await userModel.updateUserInfo( id, nickname, phonenumber,email, gender);
     ctx.body = resObj(200, null, '更新用户信息成功');
     // ctx.body = {
     //   code: 200,
    //   message: '更新用户信息成功',
     // };
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+// 更新用户密码
+exports.updatePassword = async ctx => {
+  try {
+    const userId = ctx.state.user.id;
+    const { oldPassword, newPassword } = ctx.request.body;
+
+    // 参数验证
+    if (!oldPassword || !newPassword) {
+      ctx.status = 400;
+      ctx.body = resObj(400, null, '旧密码和新密码都不能为空');
+      return;
+    }
+
+    if (typeof oldPassword !== 'string' || typeof newPassword !== 'string') {
+      ctx.status = 400;
+      ctx.body = resObj(400, null, '密码必须是字符串');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      ctx.status = 400;
+      ctx.body = resObj(400, null, '新密码长度不能少于6位');
+      return;
+    }
+
+    // 查询用户信息
+    const result = await userModel.findUserById(userId);
+    
+    // 验证旧密码是否正确
+    if (result.length && md5(oldPassword) === result[0].password) {
+      // 更新密码
+      await userModel.updateUserPassword(userId, md5(newPassword));
+      ctx.body = resObj(200, null, '密码更新成功');
+    } else {
+      ctx.status = 400;
+      ctx.body = resObj(400, null, '旧密码错误');
+    }
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+
+// 获取用户列表 
+exports.getUserList = async ctx => {
+
+  try {
+     // 获取所有查询参数
+    const query = ctx.query; 
+    const result = await userModel.getUserList({
+      ...query
+    });
+
+    const total = await userModel.getUserCount(); // 总记录数
+
+    // ctx.body = resObj(200, result, '获取用户列表成功');
+    // console.log(111,{
+    //   ...resObj(200, result, '查询成功'),
+    //     total: total[0].totalCount,
+    // });
+
+    ctx.body = {
+       ...resObj(200, result, '查询成功'),
+        total: total[0].totalCount,
+    }
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+ 
+}
+
+// 根据用户ID查询用户信息 getUserInfoById
+exports.getUserInfoById = async ctx => {
+  try {
+    const userId = ctx.params.id;
+    const result = await userModel.findUserById(userId);
+    if (result.length) {
+      ctx.body = resObj(200, result[0], '查询成功');
+    } else {
+      ctx.status = 404;
+      ctx.body = resObj(404, null, '用户不存在');
+    }
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+// 管理员更新用户所有信息 
+
+exports.updateUserAllInfo = async ctx => { 
+
+   try {
+    const {id,username,nickname, phonenumber ,email,gender,is_active} = ctx.request.body;
+    await userModel.updateUserAllInfo({ id, username,nickname, phonenumber,email, gender,is_active});
+    ctx.body = resObj(200, null, '修改用户信息成功');
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = resObj(500, null, '服务器内部错误');
+  }
+}
+
+// 删除用户
+exports.deleteUser = async ctx => {
+  try {
+    const {id} = ctx.request.body;
+    await userModel.deleteUser(id);
+    ctx.body = resObj(200, null, '删除用户成功');
   } catch (err) {
     console.error(err);
     ctx.status = 500;

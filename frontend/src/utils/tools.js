@@ -61,6 +61,13 @@ export const isImage = (fileName) => {
   return imageExtensions.includes(ext);
 }
 
+// 判断当前文件是否为视频文件
+export const isVideo = (fileName) => {
+  const videoExtensions = ['.mp4', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.webm'];
+  const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+  return videoExtensions.includes(ext);
+}
+
 
 // 获取文件的后缀名
 export const getFileExtension = (fileName) => {

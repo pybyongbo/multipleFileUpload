@@ -40,3 +40,31 @@ export const uploadAvatar = params => {
 export const updateUserInfo = params => {
   return http.post('/updateUserInfo', params);
 }
+
+// 更新用户密码 updateUserPassword
+export const updateUserPassword = params => {
+  return http.post('/updatePassword', params);
+}
+
+// 获取所有用户列表
+
+export const getUserList = params => {
+  return http.get('/getUserList', params);
+}
+
+
+// 查询用户详情信息
+export const getUserDetail = (id) => {
+  console.log('id',id);
+  return http.get(`/getUserInfoById/${id}`);
+};
+
+// 管理员更新用户所有信息
+export const updateUserAllInfo = params => {
+  return http.post('/updateUserAllInfo', params);
+}
+
+// 删除用户
+export const deleteUserById = (params) => {
+  return http.post('/deleteUser', params);
+}
