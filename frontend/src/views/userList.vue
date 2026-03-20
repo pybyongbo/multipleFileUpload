@@ -262,7 +262,10 @@
               align="center"
             >
               <template #default="scope">
-                <el-tag :type="formatGenderTagType(scope.row.gender)" effect="plain">
+                <el-tag
+                  :type="formatGenderTagType(scope.row.gender)"
+                  effect="plain"
+                >
                   {{ formatGender(scope.row.gender) }}
                 </el-tag>
               </template>
