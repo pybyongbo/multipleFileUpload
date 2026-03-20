@@ -1,44 +1,47 @@
 <script setup>
-import { ref } from 'vue'
-import { ElMessageBox, ElMessage } from 'element-plus'
-import useUserStore from '@/store/modules/user'
-const userStore = useUserStore()
+import { computed, onMounted } from 'vue';
+import { ElMessageBox, ElMessage } from 'element-plus';
+import { useRouter } from 'vue-router';
+import useUserStore from '@/store/modules/user';
+const userStore = useUserStore();
+const router = useRouter();
 
-// console.log('userStore', userStore);
-userStore.getInfo().then(res => {
-  console.log('6655', res);
+const canShowUserList = computed(
+  () => Number(userStore.userInfo?.user_type) === 1,
+);
 
-}).catch(() => {
-})
+const ensureUserInfoLoaded = async () => {
+  if (!localStorage.getItem('token')) return;
+  if (userStore.userInfo?.id) return;
 
-
-function logout() {
-  ElMessageBox.confirm('确定注销并退出系统吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    userStore.logOut().then(() => {
-      window.location.href = '/login';
-    })
-  }).catch(() => { })
-}
-
-function handleCommand(command) {
-  switch (command) {
-    // case "setLayout":
-    //   setLayout()
-    //   break
-    case "logout":
-      logout()
-      break
-    default:
-      break
+  try {
+    await userStore.getInfo();
+  } catch (e) {
+    // token 过期等情况由 request 拦截器统一处理
   }
-}
+};
 
+onMounted(ensureUserInfoLoaded);
 
+const logout = async () => {
+  try {
+    await ElMessageBox.confirm('确定注销并退出系统吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    });
 
+    await userStore.logOut();
+    ElMessage.success('已退出登录');
+    router.push('/login');
+  } catch (e) {
+    // 取消操作直接忽略
+  }
+};
+
+const handleCommand = (command) => {
+  if (command === 'logout') logout();
+};
 </script>
 
 <template>
@@ -48,9 +51,7 @@ function handleCommand(command) {
         <h1>📁 多文件上传系统</h1>
       </div>
       <div class="nav-menu">
-        <router-link to="/uploadfile" class="nav-link">
-          首页
-        </router-link>
+        <router-link to="/uploadfile" class="nav-link"> 首页 </router-link>
         <router-link to="/uploadfileBase64" class="nav-link">
           Base64上传
         </router-link>
@@ -65,21 +66,23 @@ function handleCommand(command) {
           接口下载文件
         </router-link>
 
-        <router-link to="/fileList" class="nav-link">
-          文件列表
-        </router-link>
+        <router-link to="/fileList" class="nav-link"> 文件列表 </router-link>
 
-         <router-link to="/userList" class="nav-link" v-if="userStore.userInfo.user_type=='1'">
+        <router-link to="/userList" class="nav-link" v-if="canShowUserList">
           用户列表
         </router-link>
       </div>
     </div>
 
-    <el-dropdown @command="handleCommand" class="avatar-container" trigger="hover">
+    <el-dropdown
+      @command="handleCommand"
+      class="avatar-container"
+      trigger="hover"
+    >
       <div class="avatar-wrapper">
         <span class="user-nickname">
           <!-- <el-avatar size="small" icon="el-icon-user" class="user-avatar" /> -->
-          <el-avatar style="width:24px;height:24px;vertical-align: -4px;margin-right:3px;">
+          <el-avatar class="user-avatar">
             <svg-icon icon-class="user" class="el-input__icon input-icon" />
           </el-avatar>
           {{ userStore.userInfo.username }}
@@ -185,7 +188,10 @@ function handleCommand(command) {
     cursor: pointer;
 
     .user-avatar {
-      margin-right: 10px;
+      width: 24px;
+      height: 24px;
+      vertical-align: -4px;
+      margin-right: 3px;
     }
 
     .user-nickname {

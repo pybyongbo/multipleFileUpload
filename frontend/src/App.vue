@@ -1,11 +1,9 @@
 <template>
-
-    <router-view></router-view>
-
+  <router-view></router-view>
 </template>
 
 <script setup>
-import {  ref } from 'vue';
+import { ref } from 'vue';
 </script>
 
 <style scoped lang="scss">
@@ -21,10 +19,7 @@ import {  ref } from 'vue';
 }
 </style>
 
-
-<style lang="scss" >
-
-
+<style lang="scss">
 // 移除 el-button 聚焦时的边框 - 全局
 :deep(.el-button:focus) {
   outline: none;
@@ -52,7 +47,7 @@ import {  ref } from 'vue';
   .el-button {
     &:focus,
     &:focus-visible {
-      outline: none!important;
+      outline: none !important;
       border-color: transparent;
     }
   }
@@ -63,7 +58,7 @@ import {  ref } from 'vue';
   .el-button {
     &:focus,
     &:focus-visible {
-      outline: none!important;
+      outline: none !important;
       border-color: transparent;
     }
   }
