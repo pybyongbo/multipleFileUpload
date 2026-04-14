@@ -1,21 +1,21 @@
 // hooks/useWatermarkBg.js
-import { computed, watch } from "vue";
+import { computed, watch } from 'vue';
 
-export default function useWatermarkBg(props){
+export default function useWatermarkBg(props) {
   // 如果 props 是响应式的，直接解构会失去响应性
   // 应该这样处理：
 
   return computed(() => {
-    const { text, fontSize, gap, color ,rotate} = props;
-    
+    const { text, fontSize, gap, color, rotate } = props;
+
     if (!text) {
       return {
         base64: '',
         size: 0,
         styleSize: 0,
-      }
+      };
     }
-    
+
     const canvas = document.createElement('canvas');
     const devicePixelRatio = window.devicePixelRatio || 1;
     const fontSizeStyle = fontSize * devicePixelRatio;
@@ -27,7 +27,7 @@ export default function useWatermarkBg(props){
         base64: '',
         size: 0,
         styleSize: 0,
-      }
+      };
     }
 
     // 获取文字宽度
@@ -41,7 +41,7 @@ export default function useWatermarkBg(props){
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
     // 倾斜文本
-    ctx.rotate(Math.PI / 180 * rotate);
+    ctx.rotate((Math.PI / 180) * rotate);
     ctx.fillStyle = color || 'rgba(0, 0, 0, 0.15)';
     ctx.font = font;
     ctx.textAlign = 'center';
@@ -52,6 +52,6 @@ export default function useWatermarkBg(props){
       base64: canvas.toDataURL(),
       size: canvasSize,
       styleSize: canvasSize / devicePixelRatio,
-    }
-  })
+    };
+  });
 }
