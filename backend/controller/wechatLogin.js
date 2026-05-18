@@ -36,7 +36,7 @@ function buildRedirectUri() {
   const base = (process.env.API_DOMAIN || '').replace(/\/$/, '');
   if (base) return `${base}/wechat/callback`;
   const port = process.env.PORT || '3004';
-  return `http://127.0.0.1:${port}/wechat/callback`;
+  return `http://localhost:${port}/wechat/callback`;
 }
 
 /**

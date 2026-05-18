@@ -21,7 +21,7 @@ var http = require('http');
  */
 console.log('process.env.PORT', process.env.PORT);
 var port = normalizePort(process.env.PORT || '3000');
-var host = process.env.HOST || '127.0.0.1';
+var host = process.env.HOST || 'localhost';
 
 /**
  * Create HTTP server.
@@ -30,7 +30,7 @@ var host = process.env.HOST || '127.0.0.1';
 var server = http.createServer(app.callback());
 
 /**
- * Listen on HOST:PORT（开发默认 127.0.0.1，与前端、微信回调域一致）
+ * Listen on HOST:PORT（开发默认 localhost）
  */
 
 server.listen(port, host);
@@ -66,9 +66,10 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Host ' + host + ' Port ' + port;
+  var bind =
+    typeof port === 'string'
+      ? 'Pipe ' + port
+      : 'Host ' + host + ' Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -91,10 +92,8 @@ function onError(error) {
 
 function onListening() {
   var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
-  var displayHost = host === '0.0.0.0' ? '127.0.0.1' : host;
+  var displayHost = host === '0.0.0.0' ? 'localhost' : host;
   console.log(`服务器运行在 http://${displayHost}:${addr.port}`);
 }
