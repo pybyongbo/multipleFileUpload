@@ -24,6 +24,7 @@ const index = require('./routes/index')
 const users = require('./routes/users')
 const upload = require('./routes/upload')
 const bigupload = require('./routes/bigupload.js')
+const wechat = require('./routes/wechat.js')
 
 // error handler
 onerror(app)
@@ -126,7 +127,8 @@ app.use(jwt({
     /^\/logout/,
     /^\/public/,
     /^\/favicon.ico/,  
-    /^\/mergeSlice/
+    /^\/mergeSlice/,
+    /^\/wechat\//,
   ]
 }))
 
@@ -143,6 +145,7 @@ app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 app.use(upload.routes(), upload.allowedMethods())
 app.use(bigupload.routes(), bigupload.allowedMethods())
+app.use(wechat.routes(), wechat.allowedMethods())
 
 // 全局错误处理
 app.on('error', (err, ctx) => {

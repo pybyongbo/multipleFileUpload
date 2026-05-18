@@ -1,70 +1,77 @@
-import http from '@/utils/request'
+import http from '@/utils/request';
 
 // 用户注册
-export const addUser = params => {
-  return http.post("/register", params);
+export const addUser = (params) => {
+  return http.post('/register', params);
 };
-
 
 // 用户登录
-export const userLogin = params => {
-  return http.post("/login", params);
+export const userLogin = (params) => {
+  return http.post('/login', params);
 };
 
-export const logout = params => {
-  return http.post("/logout", params);
-};
+/**
+ * 微信扫码登录（需后端对接微信开放平台「网站应用」扫码登录）
+ * GET /wechat/qr — 建议返回 { code, data: { qrUrl, ticket } }
+ * GET /wechat/status — 查询 ticket 是否已扫码确认，建议返回 { code, data: { token, user } }
+ */
+export const getWechatLoginQr = () => http.get('/wechat/qr');
 
+export const getWechatLoginStatus = (params) =>
+  http.get('/wechat/status', params);
+
+export const logout = (params) => {
+  return http.post('/logout', params);
+};
 
 export const getUserInfo = () => {
   return http.get('/getUserInfo');
-}
+};
 
 // 更新用户邮箱信息
-export const updateUserEmail = params => {
+export const updateUserEmail = (params) => {
   return http.post('/updateEmail', params);
-}
+};
 
 // 更新用户上传头像
 
-export const uploadAvatar = params => {
-  console.log('params',params);
-  return http.post('/uploadAvatar', params,{
+export const uploadAvatar = (params) => {
+  console.log('params', params);
+  return http.post('/uploadAvatar', params, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   });
-}
+};
 
 // 更新用户基本信息
-export const updateUserInfo = params => {
+export const updateUserInfo = (params) => {
   return http.post('/updateUserInfo', params);
-}
+};
 
 // 更新用户密码 updateUserPassword
-export const updateUserPassword = params => {
+export const updateUserPassword = (params) => {
   return http.post('/updatePassword', params);
-}
+};
 
 // 获取所有用户列表
 
-export const getUserList = params => {
+export const getUserList = (params) => {
   return http.get('/getUserList', params);
-}
-
+};
 
 // 查询用户详情信息
 export const getUserDetail = (id) => {
-  console.log('id',id);
+  console.log('id', id);
   return http.get(`/getUserInfoById/${id}`);
 };
 
 // 管理员更新用户所有信息
-export const updateUserAllInfo = params => {
+export const updateUserAllInfo = (params) => {
   return http.post('/updateUserAllInfo', params);
-}
+};
 
 // 删除用户
 export const deleteUserById = (params) => {
   return http.post('/deleteUser', params);
-}
+};

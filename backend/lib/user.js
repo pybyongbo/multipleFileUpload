@@ -129,3 +129,35 @@ exports.deleteUser = (id) => {
   let _sql = `DELETE FROM users WHERE id = ?`;
   return query(_sql, [id]);
 }
+
+/** 根据微信 openid 查询用户 */
+exports.findUserByWechatOpenid = (openid) => {
+  let _sql = `SELECT * FROM users WHERE wechat_openid = ? LIMIT 1`;
+  return query(_sql, [openid]);
+};
+
+/**
+ * 首次微信扫码注册用户（密码为随机 MD5，仅用于占位，不建议用账号密码登录该账号）
+ */
+exports.createUserFromWechat = ({
+  username,
+  passwordMd5,
+  openid,
+  nickname,
+  avatar,
+  created_at,
+  updated_at,
+}) => {
+  let _sql = `INSERT INTO users
+    (username, email, password, wechat_openid, nickname, avatar, created_at, updated_at, last_login, is_active)
+    VALUES (?, '', ?, ?, ?, ?, ?, ?, NULL, 1)`;
+  return query(_sql, [
+    username,
+    passwordMd5,
+    openid,
+    nickname || null,
+    avatar || null,
+    created_at,
+    updated_at,
+  ]);
+};

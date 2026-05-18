@@ -26,21 +26,11 @@ export default defineConfig({
       },
       extensions: ['.vue','.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
     },
-    // server: {
-    // open: false,
-    // port: 5173, // 本地端口号
-    // host: "0.0.0.0",
-    // proxy: {
-    //   // 请求代理地址(仅开发环境有效)
-    //   "/api": {
-    //     target: "http://localhost:3000/",
-    //     changeOrigin: true,
-    //     secure: true, // 如果是https接口，需要配置这个参数
-    //     ws: true, //websocket支持
-    //     rewrite: (path) => path.replace(/^\/api/, '')
-    //   }
-    // }
-  // },
+    server: {
+      host: true, // 同时监听 localhost 与 127.0.0.1（微信本地调试常用 127.0.0.1）
+      port: 5173,
+      open: false,
+    },
 build: {
     chunkSizeWarningLimit: 1000,
     outDir: 'dist', // 打包后文件包名称
