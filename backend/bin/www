@@ -6,11 +6,8 @@
 // import {  resolve } from 'path';
 // const { resolve } = require('path');
 // const { dirname } = require('path');
-// 更准确地定位环境变量文件路径
-// const envFilePath = resolve(__dirname, '../../', `.env.${process.env.NODE_ENV || 'development'}`);
-// require('dotenv').config({
-//   path: envFilePath
-// });
+// 必须在 require app 之前加载，否则 app.js 会按错误的 NODE_ENV 读 CORS 配置
+require('../lib/loadEnv')();
 
 var app = require('../app');
 var debug = require('debug')('demo:server');

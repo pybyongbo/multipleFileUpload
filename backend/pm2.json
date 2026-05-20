@@ -1,0 +1,23 @@
+{
+  "apps": [
+    {
+      "name": "koa2-fileupload",
+      "script": "./bin/www",
+      "cwd": "/www/html/fileuploadapi.901web.com",
+      "watch": ["bin", "routes", "controller", "lib", "app.js"],
+      "ignore_watch": ["node_modules", "logs", "public"],
+      "watch_options": {
+        "followSymlinks": false
+      },
+      "error_file": "./logs/app-err.log",
+      "out_file": "./logs/app-out.log",
+      "env": {
+        "PORT": 3004,
+        "HOST": "0.0.0.0",
+        "NODE_ENV": "production",
+        "WECHAT_LOGIN_MODE": "mp",
+        "CORS_ORIGIN": "https://fileupload.901web.com,https://www.fileupload.901web.com,http://fileupload.901web.com"
+      }
+    }
+  ]
+}

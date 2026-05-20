@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nodemon bin/www",
     "dev": "./node_modules/.bin/nodemon bin/www",
-    "prd": "NODE_ENV=production pm2 start bin/www --name fileupload-api",
+    "prd": "pm2 start ecosystem.config.js --env production",
+    "prd:restart": "pm2 restart ecosystem.config.js --env production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

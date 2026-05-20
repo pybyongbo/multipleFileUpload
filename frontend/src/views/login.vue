@@ -116,14 +116,28 @@
         >
           刷新二维码
         </el-button>
-        <p class="wechat-tip">请使用微信扫描上方二维码，按提示完成授权登录。</p>
-        <!-- <p class="wechat-note">
-          说明：真实二维码需后端对接
+        <p class="wechat-tip">请使用微信 App 扫描上方二维码，在手机微信内确认授权后，电脑将自动登录。</p>
+        <p class="wechat-note">
+          个人开发者使用
+          <a
+            href="https://developers.weixin.qq.com/doc/offiaccount/OAuth_Web/Wechat_webpage_authorization.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            >公众号网页授权</a
+          >
+          （snsapi_userinfo）。须在
+          <a href="https://mp.weixin.qq.com" target="_blank" rel="noopener noreferrer"
+            >公众平台</a
+          >
+          配置「网页授权域名」为 fileupload.901web.com。
+        </p>
+        <!-- <p class="wechat-note legacy">
+          企业账号可用开放平台
           <a
             href="https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html"
             target="_blank"
             rel="noopener noreferrer"
-            >微信开放平台 · 网站应用扫码登录</a
+            >网站应用扫码登录</a
           >
           ；未配置接口时将显示演示占位图。
         </p> -->
@@ -157,7 +171,7 @@ function toggleLoginMode() {
 
 const loginForm = ref({
   username: 'admin',
-  password: '123456',
+  password: '',
 });
 
 const loginRules = {

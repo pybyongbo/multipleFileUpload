@@ -8,6 +8,25 @@ const config = require('../config/index.js');
 const userModel = require('../lib/user.js');
 const scanStore = require('../lib/wechatScanStore.js');
 
+/** mp=公众号网页授权(个人可用)  open=开放平台网站应用 snsapi_login(需企业) */
+function getLoginMode() {
+  const m = (process.env.WECHAT_LOGIN_MODE || 'mp').trim().toLowerCase();
+  return m === 'open' ? 'open' : 'mp';
+}
+
+function getWechatCredentials() {
+  if (getLoginMode() === 'mp') {
+    return {
+      appid: process.env.MP_WECHAT_APP_ID || process.env.WECHAT_APP_ID,
+      secret: process.env.MP_WECHAT_APP_SECRET || process.env.WECHAT_APP_SECRET,
+    };
+  }
+  return {
+    appid: process.env.WECHAT_APP_ID,
+    secret: process.env.WECHAT_APP_SECRET,
+  };
+}
+
 function httpsGetJson(url) {
   return new Promise((resolve, reject) => {
     https
@@ -29,9 +48,25 @@ function httpsGetJson(url) {
   });
 }
 
+/** 解析公众平台「网页授权域名」配置值（仅主机名，无协议/路径/端口） */
+function parseMpWebAuthDomain() {
+  const raw =
+    process.env.MP_WEB_AUTH_DOMAIN || process.env.WECHAT_MP_AUTH_DOMAIN || '';
+  return raw
+    .trim()
+    .replace(/^https?:\/\//i, '')
+    .split('/')[0]
+    .split(':')[0]
+    .toLowerCase();
+}
+
 function buildRedirectUri() {
+  const mpHost = parseMpWebAuthDomain();
+  if (getLoginMode() === 'mp' && mpHost && !process.env.WECHAT_REDIRECT_URI) {
+    return `https://${mpHost}/wechat/callback`;
+  }
   if (process.env.WECHAT_REDIRECT_URI) {
-    return process.env.WECHAT_REDIRECT_URI.trim();
+    return process.env.WECHAT_REDIRECT_URI.trim().replace(/\/$/, '');
   }
   const base = (process.env.API_DOMAIN || '').replace(/\/$/, '');
   if (base) return `${base}/wechat/callback`;
@@ -39,23 +74,25 @@ function buildRedirectUri() {
   return `http://localhost:${port}/wechat/callback`;
 }
 
-/**
- * 微信网站应用「授权回调域」仅支持已备案的合法域名，不支持 localhost / 127.0.0.1 / 局域网 IP。
- * 使用本地地址时扫码常会报「Scope 参数错误或没有 Scope 权限」（实为回调域不合法）。
- * @see https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html
- */
-function getRedirectUriBlockReason(redirectUri) {
+/** 公众号网页授权 10003：redirect_uri 主机名须与「网页授权域名」完全一致 */
+function getMpWebAuthDomainMismatch(redirectUri) {
+  if (getLoginMode() !== 'mp') return null;
+  const configured = parseMpWebAuthDomain();
+  if (!configured) return null;
   try {
-    const { hostname } = new URL(redirectUri);
-    const h = hostname.toLowerCase();
-    if (h === 'localhost' || h === '127.0.0.1' || h === '::1') {
+    const host = new URL(redirectUri).hostname.toLowerCase();
+    if (host !== configured) {
       return (
-        '微信开放平台网站应用不支持将 localhost / 127.0.0.1 作为授权回调地址，手机扫码会报「Scope 无权限」。' +
-        '请在开放平台「授权回调域」填写已备案域名（如 fileupload.901web.com），并设置 WECHAT_REDIRECT_URI=https://你的域名/wechat/callback，在公网环境测试；本地开发可用内网穿透（ngrok 等）映射到 3004 端口。'
+        `redirect_uri 域名「${host}」与 MP_WEB_AUTH_DOMAIN「${configured}」不一致，微信会报 10003。` +
+        '请在 mp.weixin.qq.com → 公众号设置 → 功能设置 → 网页授权域名 填写 ' +
+        configured +
+        '（勿填 fileuploadapi 或带 https://），并令 WECHAT_REDIRECT_URI=https://' +
+        configured +
+        '/wechat/callback'
       );
     }
-    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) {
-      return '微信网站应用通常不支持使用 IP 地址作为授权回调域，请改用已备案的 HTTPS 域名。';
+    if (new URL(redirectUri).port) {
+      return 'redirect_uri 不能包含端口号，否则公众号报 10003。';
     }
   } catch (_) {
     return 'redirect_uri 格式无效';
@@ -63,17 +100,129 @@ function getRedirectUriBlockReason(redirectUri) {
   return null;
 }
 
-/**
- * GET /wechat/qr
- * 返回 base64 图片地址（供 <img src>）与 ticket（即微信 OAuth state）
- */
+/** 生成扫码授权 URL（公众号 / 开放平台） */
+function buildOAuthAuthorizeUrl(ticket, redirectUri) {
+  const { appid } = getWechatCredentials();
+  const encodedRedirect = encodeURIComponent(redirectUri);
+  if (getLoginMode() === 'mp') {
+    return (
+      'https://open.weixin.qq.com/connect/oauth2/authorize?' +
+      `appid=${appid}&redirect_uri=${encodedRedirect}` +
+      '&response_type=code&scope=snsapi_userinfo' +
+      `&state=${ticket}#wechat_redirect`
+    );
+  }
+  return (
+    'https://open.weixin.qq.com/connect/qrconnect?' +
+    `appid=${appid}&redirect_uri=${encodedRedirect}` +
+    '&response_type=code&scope=snsapi_login' +
+    `&state=${ticket}#wechat_redirect`
+  );
+}
+
+function getRedirectUriMismatchWarning(redirectUri) {
+  if (process.env.WECHAT_REDIRECT_URI) return null;
+  const apiBase = (process.env.API_DOMAIN || '').replace(/\/$/, '');
+  if (!apiBase) return null;
+  try {
+    const redirectHost = new URL(redirectUri).hostname.toLowerCase();
+    const apiHost = new URL(apiBase).hostname.toLowerCase();
+    if (redirectHost !== apiHost) {
+      return (
+        `redirect_uri 域名（${redirectHost}）与 API_DOMAIN（${apiHost}）不一致。` +
+        '请设置 WECHAT_REDIRECT_URI，或使两者一致。'
+      );
+    }
+  } catch (_) {
+    return null;
+  }
+  return null;
+}
+
+function getRedirectUriBlockReason(redirectUri) {
+  try {
+    const { hostname } = new URL(redirectUri);
+    const h = hostname.toLowerCase();
+    if (h === 'localhost' || h === '127.0.0.1' || h === '::1') {
+      if (getLoginMode() === 'mp') {
+        return (
+          '公众号网页授权不支持 localhost。请在 mp.weixin.qq.com 配置「网页授权域名」为已备案域名，' +
+          '并将 WECHAT_REDIRECT_URI 设为 https://你的域名/wechat/callback；本地调试可用内网穿透。'
+        );
+      }
+      return (
+        '微信开放平台网站应用不支持 localhost / 127.0.0.1 作为授权回调。' +
+        '请使用已备案域名并配置 WECHAT_REDIRECT_URI。'
+      );
+    }
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) {
+      return '授权回调不支持 IP 地址，请改用已备案的域名。';
+    }
+  } catch (_) {
+    return 'redirect_uri 格式无效';
+  }
+  return null;
+}
+
+exports.diagnose = async (ctx) => {
+  const mode = getLoginMode();
+  const redirectUri = buildRedirectUri();
+  let callbackHost = '';
+  try {
+    callbackHost = new URL(redirectUri).hostname;
+  } catch (_) {
+    callbackHost = '(invalid)';
+  }
+  const { appid } = getWechatCredentials();
+  const mpAuthDomain = parseMpWebAuthDomain() || callbackHost;
+  const mpChecklist = [
+    '注册个人订阅号：mp.weixin.qq.com',
+    '公众号设置 → 功能设置 → 网页授权域名 = ' +
+      mpAuthDomain +
+      '（仅域名，无 https、无路径）',
+    'WECHAT_REDIRECT_URI=https://' + mpAuthDomain + '/wechat/callback',
+    'MP_WEB_AUTH_DOMAIN=' +
+      mpAuthDomain +
+      '（与公众平台填写一致，用于校验 10003）',
+    '开发 → 基本配置 中获取 AppID、AppSecret，填入 MP_WECHAT_APP_ID / MP_WECHAT_APP_SECRET',
+    'WECHAT_LOGIN_MODE=mp，WECHAT_REDIRECT_URI 与授权域名一致',
+    'fileupload.901web.com 的 Nginx 反代 /wechat/ 到 Node 3004',
+    '用户须用微信 App 扫二维码（非浏览器扫码）',
+  ];
+  const openChecklist = [
+    '开放平台企业账号 + 开发者资质认证',
+    '网站应用 → 能力专区 → 微信登录 = 已获得',
+    '授权回调域 = redirect_uri 的域名',
+  ];
+  ctx.body = {
+    code: 200,
+    msg: 'ok',
+    data: {
+      loginMode: mode,
+      appId: appid || null,
+      redirectUri,
+      callbackHost,
+      mpWebAuthDomain: mode === 'mp' ? mpAuthDomain : null,
+      scope: mode === 'mp' ? 'snsapi_userinfo' : 'snsapi_login',
+      checklist: mode === 'mp' ? mpChecklist : openChecklist,
+      docUrl:
+        mode === 'mp'
+          ? 'https://developers.weixin.qq.com/doc/offiaccount/OAuth_Web/Wechat_webpage_authorization.html'
+          : 'https://developers.weixin.qq.com/doc/oplatform/Website_App/WeChat_Login/Wechat_Login.html',
+    },
+  };
+};
+
 exports.getQr = async (ctx) => {
-  const appid = process.env.WECHAT_APP_ID;
-  const secret = process.env.WECHAT_APP_SECRET;
+  const { appid, secret } = getWechatCredentials();
+  const mode = getLoginMode();
   if (!appid || !secret) {
     ctx.body = {
       code: 503,
-      msg: '未配置微信登录：请在环境变量中设置 WECHAT_APP_ID、WECHAT_APP_SECRET（及可选 WECHAT_REDIRECT_URI）',
+      msg:
+        mode === 'mp'
+          ? '未配置公众号登录：请设置 MP_WECHAT_APP_ID、MP_WECHAT_APP_SECRET（mp.weixin.qq.com → 开发 → 基本配置）'
+          : '未配置微信登录：请设置 WECHAT_APP_ID、WECHAT_APP_SECRET',
       data: null,
     };
     return;
@@ -85,19 +234,39 @@ exports.getQr = async (ctx) => {
     ctx.body = {
       code: 400,
       msg: blockReason,
-      data: { redirectUri },
+      data: { redirectUri, loginMode: mode },
+    };
+    return;
+  }
+  const mismatch = getRedirectUriMismatchWarning(redirectUri);
+  if (mismatch) {
+    ctx.body = {
+      code: 400,
+      msg: mismatch,
+      data: { redirectUri, loginMode: mode },
+    };
+    return;
+  }
+  const mpDomainMismatch = getMpWebAuthDomainMismatch(redirectUri);
+  if (mpDomainMismatch) {
+    ctx.body = {
+      code: 400,
+      msg: mpDomainMismatch,
+      data: {
+        redirectUri,
+        loginMode: mode,
+        mpWebAuthDomain: parseMpWebAuthDomain(),
+      },
     };
     return;
   }
 
   const ticket = crypto.randomBytes(16).toString('hex');
   scanStore.setPending(ticket);
-
-  const encodedRedirect = encodeURIComponent(redirectUri);
-  const qrconnect = `https://open.weixin.qq.com/connect/qrconnect?appid=${appid}&redirect_uri=${encodedRedirect}&response_type=code&scope=snsapi_login&state=${ticket}#wechat_redirect`;
+  const authorizeUrl = buildOAuthAuthorizeUrl(ticket, redirectUri);
 
   try {
-    const qrUrl = await QRCode.toDataURL(qrconnect, {
+    const qrUrl = await QRCode.toDataURL(authorizeUrl, {
       width: 220,
       margin: 1,
       color: { dark: '#000000ff', light: '#ffffffff' },
@@ -105,7 +274,14 @@ exports.getQr = async (ctx) => {
     ctx.body = {
       code: 200,
       msg: 'ok',
-      data: { qrUrl, ticket },
+      data: {
+        qrUrl,
+        ticket,
+        redirectUri,
+        loginMode: mode,
+        scope: mode === 'mp' ? 'snsapi_userinfo' : 'snsapi_login',
+        callbackDomainHint: new URL(redirectUri).hostname,
+      },
     };
   } catch (e) {
     console.error('wechat getQr QRCode error', e);
@@ -114,10 +290,6 @@ exports.getQr = async (ctx) => {
   }
 };
 
-/**
- * GET /wechat/status?ticket=xxx
- * 扫码并回调完成后，返回 JWT；未完成返回 pending
- */
 exports.getStatus = async (ctx) => {
   const ticket = ctx.query.ticket;
   if (!ticket) {
@@ -145,10 +317,6 @@ exports.getStatus = async (ctx) => {
   };
 };
 
-/**
- * GET /wechat/callback?code=xxx&state=ticket
- * 微信授权后回调（需在开放平台配置授权回调域与 redirect_uri 一致）
- */
 exports.callback = async (ctx) => {
   const { code, state: ticket } = ctx.query;
   const html = (title, body) =>
@@ -170,8 +338,7 @@ exports.callback = async (ctx) => {
     return;
   }
 
-  const appid = process.env.WECHAT_APP_ID;
-  const secret = process.env.WECHAT_APP_SECRET;
+  const { appid, secret } = getWechatCredentials();
   const tokenUrl =
     'https://api.weixin.qq.com/sns/oauth2/access_token?' +
     `appid=${encodeURIComponent(appid)}&secret=${encodeURIComponent(secret)}` +
@@ -191,7 +358,7 @@ exports.callback = async (ctx) => {
     ctx.type = 'html';
     ctx.body = html(
       '授权失败',
-      `<p>微信返回错误：${tokenRes.errmsg || tokenRes.errcode}</p>`,
+      `<p>微信返回错误（${tokenRes.errcode}）：${tokenRes.errmsg || '请检查公众号 AppID/Secret 与网页授权域名'}</p>`,
     );
     return;
   }
@@ -261,7 +428,7 @@ exports.callback = async (ctx) => {
     ctx.type = 'html';
     ctx.body = html(
       '登录失败',
-      `<p>保存用户失败（请确认已执行 users_add_wechat_openid.sql 添加 wechat_openid 字段）</p><p style="color:#999;font-size:12px">${String(
+      `<p>保存用户失败（请确认已执行 users_add_wechat_openid.sql）</p><p style="color:#999;font-size:12px">${String(
         e.message || e,
       )}</p>`,
     );
@@ -271,6 +438,6 @@ exports.callback = async (ctx) => {
   ctx.type = 'html';
   ctx.body = html(
     '登录成功',
-    '<p>扫码成功，请返回登录页，系统将自动完成登录。</p><p style="color:#999;font-size:13px">可关闭本窗口。</p>',
+    '<p>授权成功，请返回电脑登录页，系统将自动完成登录。</p><p style="color:#999;font-size:13px">可关闭本窗口。</p>',
   );
 };

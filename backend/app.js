@@ -2,7 +2,6 @@ const Koa = require('koa');
 const app = new Koa();
 const views = require('koa-views');
 const json = require('koa-json');
-const { resolve } = require('path');
 const ip = require('koa-ip');
 const onerror = require('koa-onerror');
 const logger = require('koa-logger');
@@ -10,43 +9,75 @@ const { koaBody } = require('koa-body');
 const cors = require('koa2-cors');
 const jwt = require('koa-jwt');
 
-// 环境配置
-const envFilePath = resolve(
-  __dirname,
-  `.env.${process.env.NODE_ENV || 'development'}`,
-);
-require('dotenv').config({
-  path: envFilePath,
-});
+require('./lib/loadEnv')();
 
 // 配置文件
 const config = require('./config/index.js');
+
+const DEFAULT_ALLOW_METHODS =
+  'GET,POST,PUT,DELETE,PATCH,OPTIONS';
+const DEFAULT_ALLOW_HEADERS =
+  'Content-Type,Authorization,Accept,X-Requested-With,Cache-Control,X-File-Ext,X-File-Name,X-File-Type,X-File-Size';
+
+function normalizeOrigin(origin) {
+  if (!origin) return '';
+  return String(origin).trim().replace(/\/$/, '');
+}
 
 /** 允许的前端来源，逗号分隔，须与浏览器地址栏 Origin 完全一致（含 http/https、无尾斜杠） */
 function getAllowedOrigins() {
   return (process.env.CORS_ORIGIN || '')
     .split(',')
-    .map((s) => s.trim())
+    .map(normalizeOrigin)
     .filter(Boolean);
 }
 
-function applyCorsHeaders(ctx) {
-  const requestOrigin = ctx.get('Origin');
+function isOriginAllowed(requestOrigin) {
+  const normalized = normalizeOrigin(requestOrigin);
+  if (!normalized) return false;
   const allowed = getAllowedOrigins();
-  if (!requestOrigin) return;
-  if (allowed.length === 0 || allowed.includes(requestOrigin)) {
-    ctx.set('Access-Control-Allow-Origin', requestOrigin);
-    ctx.set('Access-Control-Allow-Credentials', 'true');
-    const reqHeaders = ctx.get('Access-Control-Request-Headers');
-    if (reqHeaders) {
-      ctx.set('Access-Control-Allow-Headers', reqHeaders);
-    }
-    const reqMethod = ctx.get('Access-Control-Request-Method');
-    if (reqMethod) {
-      ctx.set('Access-Control-Allow-Methods', reqMethod);
-    }
-  }
+  if (allowed.length === 0) return true;
+  return allowed.includes(normalized);
 }
+
+function applyCorsHeaders(ctx, { preflight = false } = {}) {
+  const requestOrigin = normalizeOrigin(ctx.get('Origin'));
+  if (!requestOrigin) return false;
+  if (!isOriginAllowed(requestOrigin)) {
+    console.warn(
+      '[CORS] rejected origin:',
+      requestOrigin,
+      '| allowed:',
+      getAllowedOrigins().join(', ') || '(empty — set CORS_ORIGIN in .env.production)',
+    );
+    return false;
+  }
+  ctx.set('Access-Control-Allow-Origin', requestOrigin);
+  ctx.set('Access-Control-Allow-Credentials', 'true');
+  ctx.set('Vary', 'Origin');
+
+  const reqHeaders = ctx.get('Access-Control-Request-Headers');
+  ctx.set(
+    'Access-Control-Allow-Headers',
+    reqHeaders || DEFAULT_ALLOW_HEADERS,
+  );
+  ctx.set(
+    'Access-Control-Allow-Methods',
+    preflight
+      ? DEFAULT_ALLOW_METHODS
+      : ctx.get('Access-Control-Request-Method') || DEFAULT_ALLOW_METHODS,
+  );
+  if (preflight) {
+    ctx.set('Access-Control-Max-Age', '86400');
+  }
+  return true;
+}
+
+console.log(
+  '[CORS] NODE_ENV=%s allowed origins: %s',
+  process.env.NODE_ENV || 'development',
+  getAllowedOrigins().join(', ') || '(none — any Origin will be echoed)',
+);
 
 // 路由
 const index = require('./routes/index');
@@ -58,13 +89,14 @@ const wechat = require('./routes/wechat.js');
 // error handler
 onerror(app);
 
-// 预检与跨域（放在最前，避免 OPTIONS / 401 无 CORS 头）
+// 预检与跨域（放在最前，避免 OPTIONS / 401 / Nginx 上游错误时缺 CORS 头）
 app.use(async (ctx, next) => {
-  applyCorsHeaders(ctx);
   if (ctx.method === 'OPTIONS') {
+    applyCorsHeaders(ctx, { preflight: true });
     ctx.status = 204;
     return;
   }
+  applyCorsHeaders(ctx);
   await next();
 });
 
@@ -96,11 +128,9 @@ app.use(require('koa-static')(__dirname + '/public'));
 app.use(
   cors({
     origin: (ctx) => {
-      const requestOrigin = ctx.get('Origin');
-      const allowed = getAllowedOrigins();
-      if (!requestOrigin) return allowed[0] || '*';
-      if (allowed.length === 0) return requestOrigin;
-      return allowed.includes(requestOrigin) ? requestOrigin : false;
+      const requestOrigin = normalizeOrigin(ctx.get('Origin'));
+      if (!requestOrigin) return getAllowedOrigins()[0] || '*';
+      return isOriginAllowed(requestOrigin) ? requestOrigin : false;
     },
     exposeHeaders: [
       'WWW-Authenticate',
@@ -203,8 +233,9 @@ app.use(upload.routes(), upload.allowedMethods());
 app.use(bigupload.routes(), bigupload.allowedMethods());
 app.use(wechat.routes(), wechat.allowedMethods());
 
-// 全局错误处理
+// 全局错误处理（确保 5xx 也带 CORS，否则浏览器只报跨域）
 app.on('error', (err, ctx) => {
+  if (ctx) applyCorsHeaders(ctx);
   console.error('server error', err, ctx);
 });
 

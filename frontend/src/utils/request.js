@@ -43,14 +43,11 @@ class RequestHttp {
         
         // 动态获取token，确保每次请求都是最新的
         const token = localStorage.getItem('token');
-        
-        return {
-          ...config,
-          headers: {
-            ...config.headers,
-            Authorization: token ? `Bearer ${token}` : '',
-          },
-        };
+        const headers = { ...config.headers };
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        return { ...config, headers };
       },
       (error) => {
         return Promise.reject(error);
